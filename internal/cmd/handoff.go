@@ -1556,7 +1556,10 @@ func cleanupMoleculeOnHandoff() {
 
 	// Close all descendant wisps first, then the molecule root.
 	// Without this, handoff leaks orphan wisps into the DB.
-	forceCloseDescendants(b, molID)
+	// Best-effort in handoff path — log but proceed.
+	if _, err := forceCloseDescendants(b, molID); err != nil {
+		style.PrintWarning("handoff: could not close descendants of %s: %v", molID, err)
+	}
 
 	// Force-close the molecule root wisp
 	if err := b.ForceCloseWithReason("handoff", molID); err != nil {
