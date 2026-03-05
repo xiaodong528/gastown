@@ -522,7 +522,7 @@ func TestHandler_IssueShow_MalformedExternalPrefix(t *testing.T) {
 	var resp map[string]interface{}
 	if err := json.NewDecoder(w.Body).Decode(&resp); err == nil {
 		if errMsg, ok := resp["error"].(string); ok {
-			if !strings.Contains(errMsg, "Malformed external issue ID") {
+			if !strings.Contains(errMsg, "外部 Issue ID 格式错误") {
 				t.Errorf("expected malformed-external error, got: %s", errMsg)
 			}
 		}
@@ -543,7 +543,7 @@ func TestHandler_IssueShow_ExternalWithExtraColons(t *testing.T) {
 	var resp map[string]interface{}
 	if err := json.NewDecoder(w.Body).Decode(&resp); err == nil {
 		if errMsg, ok := resp["error"].(string); ok {
-			if !strings.Contains(errMsg, "Invalid issue ID") {
+			if !strings.Contains(errMsg, "无效的 Issue ID") {
 				t.Errorf("expected invalid ID error for colon-containing ID, got: %s", errMsg)
 			}
 		}

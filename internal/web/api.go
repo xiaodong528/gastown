@@ -99,7 +99,7 @@ func (h *APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Validate CSRF token on all POST requests.
 	if r.Method == http.MethodPost && h.csrfToken != "" {
 		if r.Header.Get("X-Dashboard-Token") != h.csrfToken {
-			h.sendError(w, "Invalid or missing dashboard token", http.StatusForbidden)
+			h.sendError(w, "无效或缺失的控制面板令牌", http.StatusForbidden)
 			return
 		}
 	}
@@ -147,7 +147,7 @@ func (h *APIHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 func (h *APIHandler) handleRun(w http.ResponseWriter, r *http.Request) {
 	var req CommandRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
@@ -160,7 +160,7 @@ func (h *APIHandler) handleRun(w http.ResponseWriter, r *http.Request) {
 
 	// Enforce server-side confirmation for dangerous commands
 	if meta.Confirm && !req.Confirmed {
-		h.sendError(w, "This command requires confirmation (set confirmed: true)", http.StatusForbidden)
+		h.sendError(w, "此命令需要确认（设置 confirmed: true）", http.StatusForbidden)
 		return
 	}
 
@@ -176,7 +176,7 @@ func (h *APIHandler) handleRun(w http.ResponseWriter, r *http.Request) {
 	// Parse command into args
 	args := parseCommandArgs(req.Command)
 	if len(args) == 0 {
-		h.sendError(w, "Empty command", http.StatusBadRequest)
+		h.sendError(w, "命令为空", http.StatusBadRequest)
 		return
 	}
 
@@ -323,7 +323,7 @@ func (h *APIHandler) handleMailInbox(w http.ResponseWriter, r *http.Request) {
 		// Try without --json flag
 		output, err = h.runGtCommand(r.Context(), 10*time.Second, []string{"mail", "inbox"})
 		if err != nil {
-			h.sendError(w, "Failed to fetch inbox: "+err.Error(), http.StatusInternalServerError)
+			h.sendError(w, "收件箱获取失败："+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		// Parse text output
@@ -346,7 +346,7 @@ func (h *APIHandler) handleMailInbox(w http.ResponseWriter, r *http.Request) {
 	// Parse JSON output
 	var messages []MailMessage
 	if err := json.Unmarshal([]byte(output), &messages); err != nil {
-		h.sendError(w, "Failed to parse inbox: "+err.Error(), http.StatusInternalServerError)
+		h.sendError(w, "收件箱解析失败："+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -372,7 +372,7 @@ func (h *APIHandler) handleMailThreads(w http.ResponseWriter, r *http.Request) {
 		// Fall back to text parsing
 		output, err = h.runGtCommand(r.Context(), 10*time.Second, []string{"mail", "inbox"})
 		if err != nil {
-			h.sendError(w, "Failed to fetch inbox: "+err.Error(), http.StatusInternalServerError)
+			h.sendError(w, "收件箱获取失败："+err.Error(), http.StatusInternalServerError)
 			return
 		}
 		messages := parseMailInboxText(output)
@@ -392,7 +392,7 @@ func (h *APIHandler) handleMailThreads(w http.ResponseWriter, r *http.Request) {
 
 	var messages []MailMessage
 	if err := json.Unmarshal([]byte(output), &messages); err != nil {
-		h.sendError(w, "Failed to parse inbox: "+err.Error(), http.StatusInternalServerError)
+		h.sendError(w, "收件箱解析失败："+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -495,17 +495,17 @@ func groupIntoThreads(messages []MailMessage) []MailThread {
 func (h *APIHandler) handleMailRead(w http.ResponseWriter, r *http.Request) {
 	msgID := r.URL.Query().Get("id")
 	if msgID == "" {
-		h.sendError(w, "Missing message ID", http.StatusBadRequest)
+		h.sendError(w, "缺少消息 ID", http.StatusBadRequest)
 		return
 	}
 	if !isValidID(msgID) {
-		h.sendError(w, "Invalid message ID format", http.StatusBadRequest)
+		h.sendError(w, "无效的消息 ID 格式", http.StatusBadRequest)
 		return
 	}
 
 	output, err := h.runGtCommand(r.Context(), 10*time.Second, []string{"mail", "read", msgID})
 	if err != nil {
-		h.sendError(w, "Failed to read message: "+err.Error(), http.StatusInternalServerError)
+		h.sendError(w, "消息读取失败："+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -528,20 +528,20 @@ type MailSendRequest struct {
 func (h *APIHandler) handleMailSend(w http.ResponseWriter, r *http.Request) {
 	var req MailSendRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.To == "" || req.Subject == "" {
-		h.sendError(w, "Missing required fields (to, subject)", http.StatusBadRequest)
+		h.sendError(w, "缺少必填字段（收件人、主题）", http.StatusBadRequest)
 		return
 	}
 	if !isValidMailAddress(req.To) {
-		h.sendError(w, "Invalid recipient format", http.StatusBadRequest)
+		h.sendError(w, "无效的收件人格式", http.StatusBadRequest)
 		return
 	}
 	if req.ReplyTo != "" && !isValidID(req.ReplyTo) {
-		h.sendError(w, "Invalid reply-to ID format", http.StatusBadRequest)
+		h.sendError(w, "无效的回复 ID 格式", http.StatusBadRequest)
 		return
 	}
 
@@ -549,15 +549,15 @@ func (h *APIHandler) handleMailSend(w http.ResponseWriter, r *http.Request) {
 	const maxSubjectLen = 500
 	const maxBodyLen = 100_000
 	if len(req.Subject) > maxSubjectLen {
-		h.sendError(w, fmt.Sprintf("Subject too long (max %d bytes)", maxSubjectLen), http.StatusBadRequest)
+		h.sendError(w, fmt.Sprintf("主题过长（最大 %d 字节）", maxSubjectLen), http.StatusBadRequest)
 		return
 	}
 	if len(req.Body) > maxBodyLen {
-		h.sendError(w, fmt.Sprintf("Body too long (max %d bytes)", maxBodyLen), http.StatusBadRequest)
+		h.sendError(w, fmt.Sprintf("内容过长（最大 %d 字节）", maxBodyLen), http.StatusBadRequest)
 		return
 	}
 	if strings.Contains(req.Subject, "\x00") || strings.Contains(req.Body, "\x00") {
-		h.sendError(w, "Subject and body cannot contain null bytes", http.StatusBadRequest)
+		h.sendError(w, "主题和内容不能包含空字节", http.StatusBadRequest)
 		return
 	}
 
@@ -575,7 +575,7 @@ func (h *APIHandler) handleMailSend(w http.ResponseWriter, r *http.Request) {
 
 	output, err := h.runGtCommand(r.Context(), 30*time.Second, args)
 	if err != nil {
-		h.sendError(w, "Failed to send message: "+err.Error()+"\n"+output, http.StatusInternalServerError)
+		h.sendError(w, "消息发送失败："+err.Error()+"\n"+output, http.StatusInternalServerError)
 		return
 	}
 
@@ -1001,18 +1001,18 @@ type IssueShowResponse struct {
 func (h *APIHandler) handleIssueShow(w http.ResponseWriter, r *http.Request) {
 	issueID := r.URL.Query().Get("id")
 	if issueID == "" {
-		h.sendError(w, "Missing issue ID", http.StatusBadRequest)
+		h.sendError(w, "缺少 Issue ID", http.StatusBadRequest)
 		return
 	}
 	// Issue IDs may use external:prefix:id format for cross-rig dependencies.
 	// Unwrap to the raw bead ID before validation and bd show.
 	showID := beads.ExtractIssueID(issueID)
 	if strings.HasPrefix(issueID, "external:") && showID == issueID {
-		h.sendError(w, "Malformed external issue ID (expected external:prefix:id)", http.StatusBadRequest)
+		h.sendError(w, "外部 Issue ID 格式错误（应为 external:prefix:id）", http.StatusBadRequest)
 		return
 	}
 	if !isValidID(showID) {
-		h.sendError(w, "Invalid issue ID format", http.StatusBadRequest)
+		h.sendError(w, "无效的 Issue ID 格式", http.StatusBadRequest)
 		return
 	}
 
@@ -1032,7 +1032,7 @@ func (h *APIHandler) handleIssueShow(w http.ResponseWriter, r *http.Request) {
 	// Fall back to text parsing
 	output, err = h.runBdCommand(r.Context(), 10*time.Second, []string{"show", showID})
 	if err != nil {
-		h.sendError(w, "Failed to fetch issue: "+err.Error(), http.StatusInternalServerError)
+		h.sendError(w, "Issue 获取失败："+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -1063,12 +1063,12 @@ type IssueCreateResponse struct {
 func (h *APIHandler) handleIssueCreate(w http.ResponseWriter, r *http.Request) {
 	var req IssueCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.Title == "" {
-		h.sendError(w, "Title is required", http.StatusBadRequest)
+		h.sendError(w, "标题不能为空", http.StatusBadRequest)
 		return
 	}
 
@@ -1076,23 +1076,23 @@ func (h *APIHandler) handleIssueCreate(w http.ResponseWriter, r *http.Request) {
 	const maxTitleLen = 500
 	const maxDescriptionLen = 100_000 // 100KB
 	if len(req.Title) > maxTitleLen {
-		h.sendError(w, fmt.Sprintf("Title too long (max %d bytes)", maxTitleLen), http.StatusBadRequest)
+		h.sendError(w, fmt.Sprintf("标题过长（最大 %d 字节）", maxTitleLen), http.StatusBadRequest)
 		return
 	}
 	if len(req.Description) > maxDescriptionLen {
-		h.sendError(w, fmt.Sprintf("Description too long (max %d bytes)", maxDescriptionLen), http.StatusBadRequest)
+		h.sendError(w, fmt.Sprintf("描述过长（最大 %d 字节）", maxDescriptionLen), http.StatusBadRequest)
 		return
 	}
 
 	// Validate title doesn't contain control characters or newlines
 	if strings.ContainsAny(req.Title, "\n\r\x00") {
-		h.sendError(w, "Title cannot contain newlines or control characters", http.StatusBadRequest)
+		h.sendError(w, "标题不能包含换行符或控制字符", http.StatusBadRequest)
 		return
 	}
 
 	// Validate description if provided
 	if req.Description != "" && strings.Contains(req.Description, "\x00") {
-		h.sendError(w, "Description cannot contain null characters", http.StatusBadRequest)
+		h.sendError(w, "描述不能包含空字符", http.StatusBadRequest)
 		return
 	}
 
@@ -1122,7 +1122,7 @@ func (h *APIHandler) handleIssueCreate(w http.ResponseWriter, r *http.Request) {
 	resp := IssueCreateResponse{}
 	if err != nil {
 		resp.Success = false
-		resp.Error = "Failed to create issue: " + err.Error()
+		resp.Error = "Issue 创建失败：" + err.Error()
 		if output != "" {
 			resp.Message = output
 		}
@@ -1155,16 +1155,16 @@ type IssueCloseRequest struct {
 func (h *APIHandler) handleIssueClose(w http.ResponseWriter, r *http.Request) {
 	var req IssueCloseRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.ID == "" {
-		h.sendError(w, "Issue ID is required", http.StatusBadRequest)
+		h.sendError(w, "Issue ID 不能为空", http.StatusBadRequest)
 		return
 	}
 	if !isValidID(req.ID) {
-		h.sendError(w, "Invalid issue ID format", http.StatusBadRequest)
+		h.sendError(w, "无效的 Issue ID 格式", http.StatusBadRequest)
 		return
 	}
 
@@ -1174,7 +1174,7 @@ func (h *APIHandler) handleIssueClose(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
-			"error":   "Failed to close issue: " + err.Error(),
+			"error":   "Issue 关闭失败：" + err.Error(),
 			"output":  output,
 		})
 		return
@@ -1198,16 +1198,16 @@ type IssueUpdateRequest struct {
 func (h *APIHandler) handleIssueUpdate(w http.ResponseWriter, r *http.Request) {
 	var req IssueUpdateRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.ID == "" {
-		h.sendError(w, "Issue ID is required", http.StatusBadRequest)
+		h.sendError(w, "Issue ID 不能为空", http.StatusBadRequest)
 		return
 	}
 	if !isValidID(req.ID) {
-		h.sendError(w, "Invalid issue ID format", http.StatusBadRequest)
+		h.sendError(w, "无效的 Issue ID 格式", http.StatusBadRequest)
 		return
 	}
 
@@ -1222,7 +1222,7 @@ func (h *APIHandler) handleIssueUpdate(w http.ResponseWriter, r *http.Request) {
 			args = append(args, "--status="+req.Status)
 			hasUpdate = true
 		default:
-			h.sendError(w, "Invalid status (allowed: open, in_progress)", http.StatusBadRequest)
+			h.sendError(w, "无效的状态（允许值：open、in_progress）", http.StatusBadRequest)
 			return
 		}
 	}
@@ -1234,7 +1234,7 @@ func (h *APIHandler) handleIssueUpdate(w http.ResponseWriter, r *http.Request) {
 
 	if req.Assignee != "" {
 		if !isValidID(req.Assignee) {
-			h.sendError(w, "Invalid assignee format", http.StatusBadRequest)
+			h.sendError(w, "无效的负责人格式", http.StatusBadRequest)
 			return
 		}
 		args = append(args, "--assignee="+req.Assignee)
@@ -1242,7 +1242,7 @@ func (h *APIHandler) handleIssueUpdate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !hasUpdate {
-		h.sendError(w, "No update fields provided", http.StatusBadRequest)
+		h.sendError(w, "未提供更新字段", http.StatusBadRequest)
 		return
 	}
 
@@ -1252,7 +1252,7 @@ func (h *APIHandler) handleIssueUpdate(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		_ = json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
-			"error":   "Failed to update issue: " + err.Error(),
+			"error":   "Issue 更新失败：" + err.Error(),
 			"output":  output,
 		})
 		return
@@ -1488,7 +1488,7 @@ func (h *APIHandler) handlePRShow(w http.ResponseWriter, r *http.Request) {
 	prURL := r.URL.Query().Get("url")
 
 	if prURL == "" && (repo == "" || number == "") {
-		h.sendError(w, "Missing repo/number or url parameter", http.StatusBadRequest)
+		h.sendError(w, "缺少 repo/number 或 url 参数", http.StatusBadRequest)
 		return
 	}
 
@@ -1497,27 +1497,27 @@ func (h *APIHandler) handlePRShow(w http.ResponseWriter, r *http.Request) {
 	if prURL != "" {
 		const maxURLLen = 2000
 		if len(prURL) > maxURLLen {
-			h.sendError(w, fmt.Sprintf("PR URL too long (max %d bytes)", maxURLLen), http.StatusBadRequest)
+			h.sendError(w, fmt.Sprintf("PR URL 过长（最大 %d 字节）", maxURLLen), http.StatusBadRequest)
 			return
 		}
 		if strings.ContainsAny(prURL, "\x00\n\r") {
-			h.sendError(w, "PR URL cannot contain null bytes or newlines", http.StatusBadRequest)
+			h.sendError(w, "PR URL 不能包含空字节或换行符", http.StatusBadRequest)
 			return
 		}
 		// Allow any https:// URL, not just github.com — supports GitHub Enterprise.
 		// gh CLI validates against the configured host and rejects non-GitHub API responses,
 		// limiting SSRF risk. Localhost-only deployment further reduces exposure.
 		if !strings.HasPrefix(prURL, "https://") {
-			h.sendError(w, "PR URL must start with https://", http.StatusBadRequest)
+			h.sendError(w, "PR URL 必须以 https:// 开头", http.StatusBadRequest)
 			return
 		}
 	} else {
 		if !isNumeric(number) {
-			h.sendError(w, "Invalid PR number format", http.StatusBadRequest)
+			h.sendError(w, "无效的 PR 编号格式", http.StatusBadRequest)
 			return
 		}
 		if !isValidRepoRef(repo) {
-			h.sendError(w, "Invalid repo format (expected owner/repo)", http.StatusBadRequest)
+			h.sendError(w, "无效的仓库格式（应为 owner/repo）", http.StatusBadRequest)
 			return
 		}
 	}
@@ -1531,7 +1531,7 @@ func (h *APIHandler) handlePRShow(w http.ResponseWriter, r *http.Request) {
 
 	output, err := h.runGhCommand(r.Context(), 15*time.Second, args)
 	if err != nil {
-		h.sendError(w, "Failed to fetch PR: "+err.Error(), http.StatusInternalServerError)
+		h.sendError(w, "PR 获取失败："+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -1977,19 +1977,19 @@ type SessionPreviewResponse struct {
 func (h *APIHandler) handleSessionPreview(w http.ResponseWriter, r *http.Request) {
 	sessionName := r.URL.Query().Get("session")
 	if sessionName == "" {
-		h.sendError(w, "Missing session parameter", http.StatusBadRequest)
+		h.sendError(w, "缺少 session 参数", http.StatusBadRequest)
 		return
 	}
 
 	// Validate session name: must start with a known prefix and contain only safe characters
 	hasValidPrefix := session.HasKnownPrefix(sessionName)
 	if !hasValidPrefix {
-		h.sendError(w, "Invalid session name: must start with a known rig prefix", http.StatusBadRequest)
+		h.sendError(w, "无效的会话名称：必须以已知的 Rig 前缀开头", http.StatusBadRequest)
 		return
 	}
 	for _, c := range sessionName {
 		if !((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '-' || c == '_') {
-			h.sendError(w, "Invalid session name: contains invalid characters", http.StatusBadRequest)
+			h.sendError(w, "无效的会话名称：包含非法字符", http.StatusBadRequest)
 			return
 		}
 	}
@@ -2006,10 +2006,10 @@ func (h *APIHandler) handleSessionPreview(w http.ResponseWriter, r *http.Request
 	err := cmd.Run()
 	if err != nil {
 		if ctx.Err() == context.DeadlineExceeded {
-			h.sendError(w, "tmux capture-pane timed out", http.StatusGatewayTimeout)
+			h.sendError(w, "tmux capture-pane 超时", http.StatusGatewayTimeout)
 			return
 		}
-		h.sendError(w, "Failed to capture pane: "+stderr.String(), http.StatusInternalServerError)
+		h.sendError(w, "面板捕获失败："+stderr.String(), http.StatusInternalServerError)
 		return
 	}
 

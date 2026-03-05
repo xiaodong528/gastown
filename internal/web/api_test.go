@@ -374,7 +374,7 @@ func TestAPIHandler_Run_MissingCSRFToken(t *testing.T) {
 	if resp.Success {
 		t.Error("Expected success=false without CSRF token")
 	}
-	if !strings.Contains(resp.Error, "dashboard token") {
+	if !strings.Contains(resp.Error, "控制面板令牌") {
 		t.Errorf("Expected error about dashboard token, got: %q", resp.Error)
 	}
 }
@@ -415,7 +415,7 @@ func TestAPIHandler_Run_ConfirmRequired(t *testing.T) {
 	if err := json.NewDecoder(w.Body).Decode(&resp); err != nil {
 		t.Fatalf("Failed to decode response: %v", err)
 	}
-	if !strings.Contains(resp.Error, "confirmation") {
+	if !strings.Contains(resp.Error, "确认") {
 		t.Errorf("Expected error about confirmation, got: %q", resp.Error)
 	}
 }
@@ -1126,10 +1126,10 @@ func TestHandleSessionPreviewPrefixValidation(t *testing.T) {
 		{"legacy bd- prefix", "bd-some-bead", false, ""},
 		{"hq- prefix", "hq-nonexistent-session", false, ""},
 		{"gthq- prefix", "gthq-deacon", false, ""},
-		{"unknown prefix rejected", "unknown-session-name", true, "must start with a known rig prefix"},
-		{"no prefix rejected", "justsomename", true, "must start with a known rig prefix"},
-		{"invalid characters rejected", "gt-bad_chars!", true, "invalid characters"},
-		{"missing session parameter", "", true, "Missing session parameter"},
+		{"unknown prefix rejected", "unknown-session-name", true, "必须以已知的 Rig 前缀开头"},
+		{"no prefix rejected", "justsomename", true, "必须以已知的 Rig 前缀开头"},
+		{"invalid characters rejected", "gt-bad_chars!", true, "非法字符"},
+		{"missing session parameter", "", true, "缺少 session 参数"},
 	}
 
 	for _, tc := range tests {

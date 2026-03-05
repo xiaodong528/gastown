@@ -122,12 +122,12 @@ type SetupResponse struct {
 func (h *SetupAPIHandler) handleInstall(w http.ResponseWriter, r *http.Request) {
 	var req InstallRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.Path == "" {
-		h.sendError(w, "Path is required", http.StatusBadRequest)
+		h.sendError(w, "路径不能为空", http.StatusBadRequest)
 		return
 	}
 
@@ -137,7 +137,7 @@ func (h *SetupAPIHandler) handleInstall(w http.ResponseWriter, r *http.Request) 
 	expanded, err := expandHomePath(req.Path)
 	if err != nil {
 		log.Printf("handleInstall: expandHomePath(%q) failed: %v", req.Path, err)
-		h.sendError(w, "Invalid path", http.StatusBadRequest)
+		h.sendError(w, "无效的路径", http.StatusBadRequest)
 		return
 	}
 	req.Path = expanded
@@ -147,7 +147,7 @@ func (h *SetupAPIHandler) handleInstall(w http.ResponseWriter, r *http.Request) 
 	args := []string{"install"}
 	if req.Name != "" {
 		if !isValidID(req.Name) {
-			h.sendError(w, "Invalid workspace name format", http.StatusBadRequest)
+			h.sendError(w, "无效的工作空间名称格式", http.StatusBadRequest)
 			return
 		}
 		args = append(args, "--name", req.Name)
@@ -169,7 +169,7 @@ func (h *SetupAPIHandler) handleInstall(w http.ResponseWriter, r *http.Request) 
 
 	h.sendJSON(w, SetupResponse{
 		Success: true,
-		Message: fmt.Sprintf("Workspace created at %s", req.Path),
+		Message: fmt.Sprintf("工作空间已创建于 %s", req.Path),
 		Output:  output,
 	})
 }
@@ -177,20 +177,20 @@ func (h *SetupAPIHandler) handleInstall(w http.ResponseWriter, r *http.Request) 
 func (h *SetupAPIHandler) handleRigAdd(w http.ResponseWriter, r *http.Request) {
 	var req RigAddRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.Name == "" || req.GitURL == "" {
-		h.sendError(w, "Name and gitUrl are required", http.StatusBadRequest)
+		h.sendError(w, "名称和 Git URL 不能为空", http.StatusBadRequest)
 		return
 	}
 	if !isValidRigName(req.Name) {
-		h.sendError(w, "Invalid rig name format (alphanumeric and underscores only, no hyphens or dots)", http.StatusBadRequest)
+		h.sendError(w, "无效的 Rig 名称格式（仅允许字母数字和下划线，不支持连字符和点号）", http.StatusBadRequest)
 		return
 	}
 	if !isValidGitURL(req.GitURL) {
-		h.sendError(w, "Git URL must be https://, http://, ssh://, git://, or git@host:path format", http.StatusBadRequest)
+		h.sendError(w, "Git URL 格式必须为 https://、http://、ssh://、git:// 或 git@host:path", http.StatusBadRequest)
 		return
 	}
 
@@ -209,7 +209,7 @@ func (h *SetupAPIHandler) handleRigAdd(w http.ResponseWriter, r *http.Request) {
 
 	h.sendJSON(w, SetupResponse{
 		Success: true,
-		Message: fmt.Sprintf("Rig '%s' added", req.Name),
+		Message: fmt.Sprintf("Rig '%s' 已添加", req.Name),
 		Output:  output,
 	})
 }
@@ -217,12 +217,12 @@ func (h *SetupAPIHandler) handleRigAdd(w http.ResponseWriter, r *http.Request) {
 func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	var req LaunchRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.Path == "" {
-		h.sendError(w, "Path is required", http.StatusBadRequest)
+		h.sendError(w, "路径不能为空", http.StatusBadRequest)
 		return
 	}
 
@@ -230,7 +230,7 @@ func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	path, err := expandHomePath(req.Path)
 	if err != nil {
 		log.Printf("handleLaunch: expandHomePath(%q) failed: %v", req.Path, err)
-		h.sendError(w, "Invalid path", http.StatusBadRequest)
+		h.sendError(w, "无效的路径", http.StatusBadRequest)
 		return
 	}
 
@@ -240,7 +240,7 @@ func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	}
 	// Upper bound is 65534 (not 65535) to reserve room for newPort = port + 1
 	if port < 1 || port > 65534 {
-		h.sendError(w, "Port must be between 1 and 65534", http.StatusBadRequest)
+		h.sendError(w, "端口号必须在 1 到 65534 之间", http.StatusBadRequest)
 		return
 	}
 
@@ -257,7 +257,7 @@ func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	cmd.Stderr = os.Stderr
 
 	if err := cmd.Start(); err != nil {
-		h.sendError(w, "Failed to start dashboard: "+err.Error(), http.StatusInternalServerError)
+		h.sendError(w, "控制面板启动失败："+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
@@ -274,7 +274,7 @@ func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !ready {
-		h.sendError(w, "New dashboard failed to start", http.StatusInternalServerError)
+		h.sendError(w, "新控制面板启动失败", http.StatusInternalServerError)
 		return
 	}
 
@@ -282,7 +282,7 @@ func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	_ = json.NewEncoder(w).Encode(map[string]interface{}{
 		"success":  true,
-		"message":  fmt.Sprintf("Dashboard launching from %s", path),
+		"message":  fmt.Sprintf("控制面板正从 %s 启动", path),
 		"redirect": fmt.Sprintf("http://localhost:%d", newPort),
 	})
 }
@@ -290,13 +290,13 @@ func (h *SetupAPIHandler) handleLaunch(w http.ResponseWriter, r *http.Request) {
 func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Request) {
 	var req CheckWorkspaceRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		h.sendError(w, "Invalid request body", http.StatusBadRequest)
+		h.sendError(w, "无效的请求体", http.StatusBadRequest)
 		return
 	}
 
 	if req.Path == "" {
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{Valid: false, Message: "Path is required"})
+		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{Valid: false, Message: "路径不能为空"})
 		return
 	}
 
@@ -306,7 +306,7 @@ func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Re
 		// Return 200 with Valid:false (not 400) because this is a "check" endpoint
 		// that reports validity status, unlike mutating endpoints that return 400 on bad input.
 		w.Header().Set("Content-Type", "application/json")
-		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{Valid: false, Message: "Invalid path format"})
+		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{Valid: false, Message: "无效的路径格式"})
 		return
 	}
 
@@ -317,7 +317,7 @@ func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Re
 		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{
 			Valid:   false,
 			Path:    path,
-			Message: "Not a JoinAITown workspace (no mayor/ directory)",
+			Message: "不是 JoinAI 多智能体编排工厂工作空间（缺少 mayor/ 目录）",
 		})
 		return
 	}
@@ -347,7 +347,7 @@ func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Re
 		Path:    path,
 		Name:    name,
 		Rigs:    rigs,
-		Message: fmt.Sprintf("Valid workspace with %d rigs", len(rigs)),
+		Message: fmt.Sprintf("有效的工作空间，包含 %d 个 Rig", len(rigs)),
 	})
 }
 
@@ -357,14 +357,14 @@ func (h *SetupAPIHandler) handleStatus(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		h.sendJSON(w, SetupResponse{
 			Success: false,
-			Error:   "No workspace configured",
+			Error:   "未配置工作空间",
 		})
 		return
 	}
 
 	h.sendJSON(w, SetupResponse{
 		Success: true,
-		Message: "Workspace found",
+		Message: "已找到工作空间",
 		Output:  output,
 	})
 }
@@ -415,12 +415,12 @@ func NewSetupMux() (http.Handler, error) {
 }
 
 const setupHTML = `<!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="dashboard-token" content="<!--CSRF_TOKEN-->">
-    <title>JoinAITown Setup</title>
+    <title>JoinAI 多智能体编排工厂 - 初始设置</title>
     <style>
         :root {
             --bg-dark: #0d1117;
@@ -719,97 +719,79 @@ const setupHTML = `<!DOCTYPE html>
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <pre style="font-size:10px;line-height:1.1;color:#58a6ff;margin:0 0 16px 0;white-space:pre;font-family:monospace;"> __       __  ________  __        ______    ______   __       __  ________                        
-|  \  _  |  \|        \|  \      /      \  /      \ |  \     /  \|        \                       
-| $$ / \ | $$| $$$$$$$$| $$     |  $$$$$$\|  $$$$$$\| $$\   /  $$| $$$$$$$$                       
-| $$/  $\| $$| $$__    | $$     | $$   \$$| $$  | $$| $$$\ /  $$$| $$__                           
-| $$  $$$\ $$| $$  \   | $$     | $$      | $$  | $$| $$$$\  $$$$| $$  \                          
-| $$ $$\$$\$$| $$$$$   | $$     | $$   __ | $$  | $$| $$\$$ $$ $$| $$$$$                          
-| $$$$  \$$$$| $$_____ | $$_____| $$__/  \| $$__/ $$| $$ \$$$| $$| $$_____                        
-| $$$    \$$$| $$     \| $$     \\$$    $$ \$$    $$| $$  \$ | $$| $$     \                       
- \$$      \$$ \$$$$$$$$ \$$$$$$$$ \$$$$$$   \$$$$$$  \$$      \$$ \$$$$$$$$                       
-                                                                                                  
- ________   ______           __   ______   ______   __    __   ______   ______   ________   ______   __       __  __    __ 
-|        \ /      \         |  \ /      \ |      \|  \  |  \ /      \ |      \|        \ /      \ |  \  _  |  \|  \  |  \
- \$$$$$$$$|  $$$$$$\         \$$|  $$$$$$\ \$$$$$$| $$\ | $$|  $$$$$$\ \$$$$$$ \$$$$$$$$|  $$$$$$\| $$ / \ | $$| $$\ | $$
-   | $$   | $$  | $$          $$| $$  | $$  | $$  | $$$\| $$| $$__| $$  | $$     | $$   | $$  | $$| $$/  $\| $$| $$$\| $$
-   | $$   | $$  | $$          $$| $$  | $$  | $$  | $$$$\ $$| $$    $$  | $$     | $$   | $$  | $$| $$  $$$\ $$| $$$$\ $$
-   | $$   | $$  | $$     $$   $$| $$  | $$  | $$  | $$\$$ $$| $$$$$$$$  | $$     | $$   | $$  | $$| $$ $$\$$\$$| $$\$$ $$
-   | $$   | $$__/ $$     $$   $$| $$__/ $$ _| $$_ | $$ \$$$$| $$  | $$ _| $$_    | $$   | $$__/ $$| $$$$  \$$$$| $$ \$$$$
-   | $$    \$$    $$      \$$$$\ \$$    $$|   $$ \| $$  \$$$| $$  | $$|   $$ \   | $$    \$$    $$| $$$    \$$$| $$  \$$$
-    \$$     \$$$$$$         \$$$  \$$$$$$  \$$$$$$  \$$   \$$ \$$   \$$ \$$$$$$    \$$     \$$$$$$  \$$      \$$ \$$   \$$</pre>
-            <p>Let's set up your workspace</p>
+            <h1 style="font-size:2rem;color:#58a6ff;margin:0 0 16px 0;font-weight:600;letter-spacing:0.05em;">JoinAI 多智能体编排工厂</h1>
+            <p>开始配置您的工作空间</p>
         </div>
 
         <!-- Mode selection tabs -->
         <div class="mode-tabs">
-            <button class="mode-tab active" id="tab-existing" onclick="showMode('existing')">Use Existing</button>
-            <button class="mode-tab" id="tab-create" onclick="showMode('create')">Create New</button>
+            <button class="mode-tab active" id="tab-existing" onclick="showMode('existing')">使用现有工作空间</button>
+            <button class="mode-tab" id="tab-create" onclick="showMode('create')">创建新工作空间</button>
         </div>
 
         <!-- Existing Workspace Mode -->
         <div class="setup-card" id="mode-existing">
-            <h2>Open Existing Workspace</h2>
+            <h2>打开现有工作空间</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
-                Enter the path to an existing JoinAITown workspace.
+                输入现有 JoinAI 多智能体编排工厂工作空间的路径。
             </p>
             <div class="form-group">
-                <label>Workspace Path</label>
+                <label>工作空间路径</label>
                 <input type="text" id="existing-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">Path to your JoinAITown HQ directory</div>
+                <div class="hint">JoinAI 多智能体编排工厂总部目录路径</div>
             </div>
-            <button class="btn btn-primary" id="check-btn" onclick="checkWorkspace()">Check Workspace</button>
+            <button class="btn btn-primary" id="check-btn" onclick="checkWorkspace()">检查工作空间</button>
             <div id="workspace-result"></div>
         </div>
 
         <!-- Create New Workspace Mode -->
         <div class="setup-card hidden" id="mode-create">
-            <h2><span class="step-number" id="step1-num">1</span> Create Workspace (HQ)</h2>
+            <h2><span class="step-number" id="step1-num">1</span> 创建工作空间（总部）</h2>
             <div class="form-group">
-                <label>Workspace Path</label>
+                <label>工作空间路径</label>
                 <input type="text" id="install-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">Where to create your JoinAITown headquarters</div>
+                <div class="hint">JoinAI 多智能体编排工厂总部的创建位置</div>
             </div>
             <div class="form-group">
-                <label>Workspace Name (optional)</label>
+                <label>工作空间名称（可选）</label>
                 <input type="text" id="install-name" placeholder="my-workspace">
             </div>
             <div class="form-group checkbox-group">
                 <input type="checkbox" id="install-git" checked>
-                <label for="install-git">Initialize git repository</label>
+                <label for="install-git">初始化 Git 仓库</label>
             </div>
-            <button class="btn btn-primary" id="install-btn" onclick="installWorkspace()">Create Workspace</button>
+            <button class="btn btn-primary" id="install-btn" onclick="installWorkspace()">创建工作空间</button>
             <div class="output-box" id="install-output"></div>
         </div>
 
         <!-- Step 2: Add Rig (shown after create) -->
         <div class="setup-card hidden" id="step2">
-            <h2><span class="step-number" id="step2-num">2</span> Add a Rig</h2>
+            <h2><span class="step-number" id="step2-num">2</span> 添加 Rig（项目）</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
-                A rig is a project container. Add your first repository to get started.
+                Rig 是一个项目容器。添加您的第一个代码仓库以开始使用。
             </p>
             <div class="form-group">
-                <label>Rig Name</label>
+                <label>Rig 名称</label>
                 <input type="text" id="rig-name" placeholder="my-project">
-                <div class="hint">Short name for this rig (no spaces)</div>
+                <div class="hint">Rig 的简短名称（不含空格）</div>
             </div>
             <div class="form-group">
                 <label>Git URL</label>
                 <input type="text" id="rig-url" placeholder="https://github.com/user/repo.git">
-                <div class="hint">HTTPS or SSH URL of the repository</div>
+                <div class="hint">仓库的 HTTPS 或 SSH URL</div>
             </div>
-            <button class="btn btn-primary" id="rig-btn" onclick="addRig()">Add Rig</button>
-            <button class="btn btn-secondary" onclick="skipRig()">Skip for now</button>
+            <button class="btn btn-primary" id="rig-btn" onclick="addRig()">添加 Rig</button>
+            <button class="btn btn-secondary" onclick="skipRig()">暂时跳过</button>
             <div class="output-box" id="rig-output"></div>
         </div>
 
         <!-- Step 3: Done -->
         <div class="setup-card hidden" id="step3">
-            <h2><span class="step-number done">OK</span> Ready to Launch!</h2>
+            <h2><span class="step-number done">OK</span> 准备就绪！</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px;">
-                Your workspace is ready at <code id="workspace-path" style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px;">~/gt</code>
+                工作空间已就绪，路径：<code id="workspace-path" style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px;">~/gt</code>
             </p>
-            <button class="btn btn-primary" id="step3-launch-btn" onclick="launchFromStep3()">Launch Dashboard</button>
+            <button class="btn btn-primary" id="step3-launch-btn" onclick="launchFromStep3()">启动控制面板</button>
         </div>
     </div>
 
@@ -847,12 +829,12 @@ const setupHTML = `<!DOCTYPE html>
             var result = document.getElementById('workspace-result');
 
             if (!path) {
-                alert('Please enter a workspace path');
+                alert('请输入工作空间路径');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span>Checking...';
+            btn.innerHTML = '<span class="loading"></span>检查中...';
 
             fetch('/api/check-workspace', {
                 method: 'POST',
@@ -862,14 +844,14 @@ const setupHTML = `<!DOCTYPE html>
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 btn.disabled = false;
-                btn.textContent = 'Check Workspace';
+                btn.textContent = '检查工作空间';
 
                 if (data.valid) {
                     var rigsHtml = '';
                     if (data.rigs && data.rigs.length > 0) {
-                        rigsHtml = '<div class="rigs">Rigs: ' + data.rigs.map(function(r) { return '<span>' + r + '</span>'; }).join('') + '</div>';
+                        rigsHtml = '<div class="rigs">Rig：' + data.rigs.map(function(r) { return '<span>' + r + '</span>'; }).join('') + '</div>';
                     } else {
-                        rigsHtml = '<div class="rigs">No rigs configured yet</div>';
+                        rigsHtml = '<div class="rigs">暂未配置 Rig</div>';
                     }
                     result.innerHTML = '<div class="workspace-info">' +
                         '<div class="name">' + (data.name || 'Workspace') + '</div>' +
@@ -877,16 +859,16 @@ const setupHTML = `<!DOCTYPE html>
                         rigsHtml +
                         '</div>' +
                         '<div style="margin-top: 16px;">' +
-                        '<button class="btn btn-primary" id="launch-btn" onclick="launchDashboard(\'' + data.path.replace(/'/g, "\\'") + '\')">Launch Dashboard</button>' +
+                        '<button class="btn btn-primary" id="launch-btn" onclick="launchDashboard(\'' + data.path.replace(/'/g, "\\'") + '\')">启动控制面板</button>' +
                         '</div>';
                     workspacePath = data.path;
                 } else {
-                    result.innerHTML = '<div class="status-message error">' + (data.message || 'Not a valid workspace') + '</div>';
+                    result.innerHTML = '<div class="status-message error">' + (data.message || '无效的工作空间') + '</div>';
                 }
             })
             .catch(function(err) {
                 btn.disabled = false;
-                btn.textContent = 'Check Workspace';
+                btn.textContent = '检查工作空间';
                 result.innerHTML = '<div class="status-message error">Error: ' + err.message + '</div>';
             });
         }
@@ -895,7 +877,7 @@ const setupHTML = `<!DOCTYPE html>
             var btn = document.getElementById('launch-btn');
             if (btn) {
                 btn.disabled = true;
-                btn.innerHTML = '<span class="loading"></span>Launching...';
+                btn.innerHTML = '<span class="loading"></span>启动中...';
             }
 
             fetch('/api/launch', {
@@ -909,7 +891,7 @@ const setupHTML = `<!DOCTYPE html>
                     // Show loading message
                     document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#e6edf3;font-family:monospace;background:#0d1117;">' +
                         '<div style="font-size:1.5rem;color:#58a6ff;margin-bottom:16px;"></div>' +
-                        '<div style="font-size:1rem;color:#8b949e;">loading control center...</div>' +
+                        '<div style="font-size:1rem;color:#8b949e;">正在加载控制中心...</div>' +
                         '</div>';
                     // Redirect to the new dashboard
                     if (data.redirect) {
@@ -920,15 +902,15 @@ const setupHTML = `<!DOCTYPE html>
                 } else {
                     if (btn) {
                         btn.disabled = false;
-                        btn.textContent = 'Launch Dashboard';
+                        btn.textContent = '启动控制面板';
                     }
-                    alert('Failed to launch: ' + (data.error || 'Unknown error'));
+                    alert('启动失败：' + (data.error || 'Unknown error'));
                 }
             })
             .catch(function(err) {
                 if (btn) {
                     btn.disabled = false;
-                    btn.textContent = 'Launch Dashboard';
+                    btn.textContent = '启动控制面板';
                 }
                 alert('Error: ' + err.message);
             });
@@ -942,14 +924,14 @@ const setupHTML = `<!DOCTYPE html>
             var output = document.getElementById('install-output');
 
             if (!path) {
-                alert('Please enter a workspace path');
+                alert('请输入工作空间路径');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span>Creating...';
+            btn.innerHTML = '<span class="loading"></span>创建中...';
             output.className = 'output-box visible';
-            output.textContent = 'Running gt install...';
+            output.textContent = '正在运行 gt install...';
 
             fetch('/api/install', {
                 method: 'POST',
@@ -959,7 +941,7 @@ const setupHTML = `<!DOCTYPE html>
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 btn.disabled = false;
-                btn.textContent = 'Create Workspace';
+                btn.textContent = '创建工作空间';
                 output.textContent = data.output || data.message || data.error;
 
                 if (data.success) {
@@ -975,7 +957,7 @@ const setupHTML = `<!DOCTYPE html>
             })
             .catch(function(err) {
                 btn.disabled = false;
-                btn.textContent = 'Create Workspace';
+                btn.textContent = '创建工作空间';
                 output.className = 'output-box visible error';
                 output.textContent = 'Error: ' + err.message;
             });
@@ -988,14 +970,14 @@ const setupHTML = `<!DOCTYPE html>
             var output = document.getElementById('rig-output');
 
             if (!name || !url) {
-                alert('Please enter both rig name and git URL');
+                alert('请输入 Rig 名称和 Git URL');
                 return;
             }
 
             btn.disabled = true;
-            btn.innerHTML = '<span class="loading"></span>Adding rig...';
+            btn.innerHTML = '<span class="loading"></span>添加 Rig 中...';
             output.className = 'output-box visible';
-            output.textContent = 'Cloning repository and setting up rig...';
+            output.textContent = '正在克隆仓库并设置 Rig...';
 
             fetch('/api/rig/add', {
                 method: 'POST',
@@ -1005,7 +987,7 @@ const setupHTML = `<!DOCTYPE html>
             .then(function(r) { return r.json(); })
             .then(function(data) {
                 btn.disabled = false;
-                btn.textContent = 'Add Rig';
+                btn.textContent = '添加 Rig';
                 output.textContent = data.output || data.message || data.error;
 
                 if (data.success) {
@@ -1019,7 +1001,7 @@ const setupHTML = `<!DOCTYPE html>
             })
             .catch(function(err) {
                 btn.disabled = false;
-                btn.textContent = 'Add Rig';
+                btn.textContent = '添加 Rig';
                 output.className = 'output-box visible error';
                 output.textContent = 'Error: ' + err.message;
             });

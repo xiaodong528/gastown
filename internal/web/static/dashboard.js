@@ -18,6 +18,61 @@
   };
 
   // ============================================
+  // THEME TOGGLE (Light/Dark Mode)
+  // ============================================
+  var THEME_STORAGE_KEY = "gt-theme";
+
+  function getCurrentTheme() {
+    return document.documentElement.getAttribute("data-theme") === "light"
+      ? "light"
+      : "dark";
+  }
+
+  function applyTheme(theme) {
+    if (theme === "light") {
+      document.documentElement.setAttribute("data-theme", "light");
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+    updateThemeIcon();
+  }
+
+  function updateThemeIcon() {
+    var icon = document.getElementById("theme-icon");
+    if (!icon) return;
+    icon.textContent = getCurrentTheme() === "dark" ? "\u2600" : "\u263D";
+  }
+
+  function toggleTheme() {
+    var next = getCurrentTheme() === "dark" ? "light" : "dark";
+    applyTheme(next);
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, next);
+    } catch (e) {}
+  }
+
+  updateThemeIcon();
+
+  window
+    .matchMedia("(prefers-color-scheme: light)")
+    .addEventListener("change", function (e) {
+      var stored = null;
+      try {
+        stored = localStorage.getItem(THEME_STORAGE_KEY);
+      } catch (err) {}
+      if (!stored) {
+        applyTheme(e.matches ? "light" : "dark");
+      }
+    });
+
+  document.addEventListener("click", function (e) {
+    if (e.target.closest("#theme-toggle-btn")) {
+      e.preventDefault();
+      toggleTheme();
+    }
+  });
+
+  // ============================================
   // SSE (Server-Sent Events) CONNECTION
   // ============================================
   window.sseConnected = false;
@@ -67,15 +122,15 @@
     if (!el) return;
     switch (state) {
       case "live":
-        el.textContent = "Live";
+        el.textContent = "已连接";
         el.className = "connection-live";
         break;
       case "reconnecting":
-        el.textContent = "Reconnecting...";
+        el.textContent = "重新连接中...";
         el.className = "connection-reconnecting";
         break;
       default:
-        el.textContent = "Connecting...";
+        el.textContent = "连接中...";
         el.className = "";
     }
   }
@@ -96,17 +151,17 @@
 
     if (panel.classList.contains("expanded")) {
       panel.classList.remove("expanded");
-      btn.textContent = "Expand";
+      btn.textContent = "展开";
       // Resume refresh when panel is collapsed
       window.pauseRefresh = false;
     } else {
       document.querySelectorAll(".panel.expanded").forEach(function (p) {
         p.classList.remove("expanded");
         var b = p.querySelector(".expand-btn");
-        if (b) b.textContent = "Expand";
+        if (b) b.textContent = "展开";
       });
       panel.classList.add("expanded");
-      btn.textContent = "Close";
+      btn.textContent = "关闭";
       // Pause refresh while panel is expanded
       window.pauseRefresh = true;
     }
@@ -154,6 +209,8 @@
     if (window.refreshReadyPanel) window.refreshReadyPanel();
     // Update connection status indicator after morph
     updateConnectionStatus(window.sseConnected ? "live" : "reconnecting");
+    // Re-sync theme icon after morph (morph may reset icon textContent)
+    updateThemeIcon();
   });
 
   // ============================================
@@ -301,7 +358,7 @@
 
   document.getElementById("output-copy-btn").onclick = function () {
     navigator.clipboard.writeText(outputContent.textContent).then(function () {
-      showToast("success", "Copied", "Output copied to clipboard");
+      showToast("success", "已复制", "输出已复制到剪贴板");
     });
   };
 
@@ -314,7 +371,7 @@
       allCommands = data.commands || [];
     })
     .catch(function () {
-      console.error("Failed to load commands");
+      console.error("命令加载失败");
     });
 
   // Fetch dynamic options (rigs, polecats, convoys, agents, hooks)
@@ -328,7 +385,7 @@
         return data;
       })
       .catch(function () {
-        console.error("Failed to load options");
+        console.error("选项加载失败");
         return null;
       });
   }
@@ -447,7 +504,7 @@
             (field.flag || "") +
             '">';
           formHtml +=
-            '<option value="">Select ' +
+            '<option value="">选择 ' +
             escapeHtml(field.name) +
             "...</option>";
           for (var j = 0; j < options.length; j++) {
@@ -475,16 +532,16 @@
             fieldId +
             '" class="command-field-input" data-flag="' +
             (field.flag || "") +
-            '" placeholder="No ' +
+            '" placeholder="暂无可用的 ' +
             escapeHtml(pendingCommand.argType) +
-            ' available">';
+            '">';
         } else if (isMessageField) {
           formHtml +=
             '<textarea id="' +
             fieldId +
             '" class="command-field-textarea" data-flag="' +
             (field.flag || "") +
-            '" placeholder="Enter ' +
+            '" placeholder="输入 ' +
             escapeHtml(field.name) +
             '..." rows="3"></textarea>';
         } else {
@@ -493,7 +550,7 @@
             fieldId +
             '" class="command-field-input" data-flag="' +
             (field.flag || "") +
-            '" placeholder="Enter ' +
+            '" placeholder="输入 ' +
             escapeHtml(field.name) +
             '...">';
         }
@@ -512,8 +569,8 @@
 
       formHtml +=
         '<div class="command-args-actions">' +
-        '<button id="command-args-run" class="command-args-btn run">Run</button>' +
-        '<button id="command-args-cancel" class="command-args-btn cancel">Cancel</button>' +
+        '<button id="command-args-run" class="command-args-btn run">执行</button>' +
+        '<button id="command-args-cancel" class="command-args-btn cancel">取消</button>' +
         "</div></div>";
 
       resultsDiv.innerHTML = formHtml;
@@ -529,7 +586,7 @@
       if (runBtn) {
         runBtn.onclick = function () {
           runBtn.classList.add("loading");
-          runBtn.textContent = "Running";
+          runBtn.textContent = "执行中";
           runWithArgsFromForm(argFields.length || 1);
         };
       }
@@ -554,7 +611,7 @@
 
     if (visibleCommands.length === 0) {
       resultsDiv.innerHTML =
-        '<div class="command-palette-empty">No matching commands</div>';
+        '<div class="command-palette-empty">没有匹配的命令</div>';
       return;
     }
     var currentQuery = searchInput ? searchInput.value.trim() : "";
@@ -692,7 +749,7 @@
         if (recentCmd) recentItems.push(recentCmd);
       }
       if (recentItems.length > 0) {
-        visibleCommands.push({ _section: "Recent" });
+        visibleCommands.push({ _section: "最近使用" });
         for (var ri2 = 0; ri2 < recentItems.length; ri2++) {
           var rcmd = Object.assign({}, recentItems[ri2], { _recent: true });
           visibleCommands.push(rcmd);
@@ -707,7 +764,7 @@
           return c.category === context && !shownNames[c.name];
         });
         if (contextItems.length > 0) {
-          visibleCommands.push({ _section: "Suggested \u2014 " + context });
+          visibleCommands.push({ _section: "推荐 \u2014 " + context });
           for (var ci = 0; ci < contextItems.length; ci++) {
             visibleCommands.push(contextItems[ci]);
             shownNames[contextItems[ci].name] = true;
@@ -723,7 +780,7 @@
         return a.name.localeCompare(b.name);
       });
       if (remaining.length > 0) {
-        visibleCommands.push({ _section: "All Commands" });
+        visibleCommands.push({ _section: "所有命令" });
         for (var ai = 0; ai < remaining.length; ai++) {
           visibleCommands.push(remaining[ai]);
         }
@@ -950,7 +1007,7 @@
         e.preventDefault();
         expanded.classList.remove("expanded");
         var expandBtn = expanded.querySelector(".expand-btn");
-        if (expandBtn) expandBtn.textContent = "Expand";
+        if (expandBtn) expandBtn.textContent = "展开";
         window.pauseRefresh = false;
         return;
       }
@@ -1159,7 +1216,7 @@
           // Update count
           if (count) {
             var unread = data.unread_count || 0;
-            count.textContent = unread > 0 ? unread + " unread" : data.total;
+            count.textContent = unread > 0 ? unread + " 未读" : data.total;
             if (unread > 0) count.classList.add("has-unread");
             else count.classList.remove("has-unread");
           }
@@ -1170,7 +1227,7 @@
         }
       })
       .catch(function (err) {
-        loading.textContent = "Failed to load mail";
+        loading.textContent = "邮件加载失败";
         console.error("Mail load error:", err);
       });
   }
@@ -1181,42 +1238,41 @@
     var now = new Date();
     var diff = now - d;
 
-    // Format: "Jan 26, 3:45 PM" or "Jan 26 2025, 3:45 PM" if different year
+    // Format: "1月26日 15:45" or "1月26日 2025年 15:45" if different year
     var months = [
-      "Jan",
-      "Feb",
-      "Mar",
-      "Apr",
-      "May",
-      "Jun",
-      "Jul",
-      "Aug",
-      "Sep",
-      "Oct",
-      "Nov",
-      "Dec",
+      "1月",
+      "2月",
+      "3月",
+      "4月",
+      "5月",
+      "6月",
+      "7月",
+      "8月",
+      "9月",
+      "10月",
+      "11月",
+      "12月",
     ];
     var month = months[d.getMonth()];
     var day = d.getDate();
     var hours = d.getHours();
     var minutes = d.getMinutes();
-    var ampm = hours >= 12 ? "PM" : "AM";
-    hours = hours % 12 || 12;
     var minStr = minutes < 10 ? "0" + minutes : minutes;
+    var hourStr = hours < 10 ? "0" + hours : hours;
     var yearPart =
-      d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() + "," : "";
+      d.getFullYear() !== now.getFullYear() ? " " + d.getFullYear() + "年" : "";
     var dateStr =
-      month + " " + day + yearPart + ", " + hours + ":" + minStr + " " + ampm;
+      month + day + "日" + yearPart + " " + hourStr + ":" + minStr;
 
     // Add relative time in parentheses for recent messages
     var relative = "";
-    if (diff < 60000) relative = " (just now)";
+    if (diff < 60000) relative = " (刚刚)";
     else if (diff < 3600000)
-      relative = " (" + Math.floor(diff / 60000) + "m ago)";
+      relative = " (" + Math.floor(diff / 60000) + "分钟前)";
     else if (diff < 86400000)
-      relative = " (" + Math.floor(diff / 3600000) + "h ago)";
+      relative = " (" + Math.floor(diff / 3600000) + "小时前)";
     else if (diff < 604800000)
-      relative = " (" + Math.floor(diff / 86400000) + "d ago)";
+      relative = " (" + Math.floor(diff / 86400000) + "天前)";
 
     return dateStr + relative;
   }
@@ -1267,11 +1323,11 @@
 
             var sessionBadge = "";
             if (member.session === "attached") {
-              sessionBadge = '<span class="badge badge-green">Attached</span>';
+              sessionBadge = '<span class="badge badge-green">已连接</span>';
             } else if (member.session === "detached") {
-              sessionBadge = '<span class="badge badge-muted">Detached</span>';
+              sessionBadge = '<span class="badge badge-muted">已断开</span>';
             } else {
-              sessionBadge = '<span class="badge badge-muted">None</span>';
+              sessionBadge = '<span class="badge badge-muted">无</span>';
             }
 
             // Build the attach command based on the crew member's role
@@ -1311,7 +1367,7 @@
               "</td>" +
               '<td><button class="attach-btn" data-cmd="' +
               escapeHtml(attachCmd) +
-              '" title="Copy attach command">Attach</button></td>';
+              '" title="复制连接命令">连接</button></td>';
             tbody.appendChild(tr);
           });
 
@@ -1323,7 +1379,7 @@
         }
       })
       .catch(function (err) {
-        loading.textContent = "Failed to load crew";
+        loading.textContent = "Crew 数据加载失败";
         console.error("Crew load error:", err);
       });
   }
@@ -1356,15 +1412,15 @@
         if (newState === "finished") {
           showToast(
             "success",
-            "Crew Finished",
-            member.name + " finished their work!",
+            "Crew 已完成",
+            member.name + " 已完成工作！",
           );
           playNotificationSound();
         } else if (newState === "questions") {
           showToast(
             "info",
-            "Needs Attention",
-            member.name + " has questions for you",
+            "需要关注",
+            member.name + " 有问题需要您处理",
           );
           playNotificationSound();
         }
@@ -1422,11 +1478,11 @@
     navigator.clipboard
       .writeText(cmd)
       .then(function () {
-        showToast("success", "Copied", cmd);
+        showToast("success", "已复制", cmd);
       })
       .catch(function () {
         // Fallback for older browsers
-        showToast("info", "Run in terminal", cmd);
+        showToast("info", "请在终端中执行", cmd);
       });
   });
 
@@ -1438,7 +1494,7 @@
     var beadId = btn.getAttribute("data-hook-id");
     if (!beadId) return;
 
-    if (!confirm("Detach hook " + beadId + "?")) return;
+    if (!confirm("确认卸载 Hook " + beadId + "？")) return;
 
     btn.disabled = true;
     btn.textContent = "...";
@@ -1456,21 +1512,21 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Detached", beadId + " detached from hook");
+          showToast("success", "已卸载", beadId + " 已从 Hook 卸载");
           // Refresh the page to update the hooks panel
           if (typeof htmx !== "undefined") {
             htmx.trigger(document.body, "htmx:load");
           }
         } else {
-          showToast("error", "Failed", data.error || "Failed to detach hook");
+          showToast("error", "失败", data.error || "卸载 Hook 失败");
           btn.disabled = false;
-          btn.textContent = "Detach";
+          btn.textContent = "卸载";
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
         btn.disabled = false;
-        btn.textContent = "Detach";
+        btn.textContent = "卸载";
       });
   }
   window.detachHook = detachHook;
@@ -1503,7 +1559,7 @@
     var beadId = input ? input.value.trim() : "";
 
     if (!beadId) {
-      showToast("error", "Missing", "Bead ID is required");
+      showToast("error", "缺少字段", "请输入 Bead ID");
       return;
     }
 
@@ -1526,33 +1582,33 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Attached", beadId + " attached to hook");
+          showToast("success", "已挂载", beadId + " 已挂载到 Hook");
           closeHookAttachForm();
           if (typeof htmx !== "undefined") {
             htmx.trigger(document.body, "htmx:load");
           }
         } else {
-          showToast("error", "Failed", data.error || "Failed to attach hook");
+          showToast("error", "失败", data.error || "挂载 Hook 失败");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       })
       .finally(function () {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "Attach";
+          submitBtn.textContent = "挂载";
         }
       });
   }
   window.submitHookAttach = submitHookAttach;
 
   function clearAllHooks() {
-    if (!confirm("Clear ALL hooks? This will detach all hooked work.")) return;
+    if (!confirm("确认清除全部 Hook？这将卸载所有已挂载的工作。")) return;
 
     var rows = document.querySelectorAll(".hook-detach-btn");
     if (rows.length === 0) {
-      showToast("info", "Nothing", "No hooks to clear");
+      showToast("info", "无内容", "没有可清除的 Hook");
       return;
     }
 
@@ -1592,11 +1648,11 @@
             if (errors > 0) {
               showToast(
                 "error",
-                "Partial",
-                completed + " detached, " + errors + " failed",
+                "部分完成",
+                completed + " 个已卸载，" + errors + " 个失败",
               );
             } else {
-              showToast("success", "Cleared", completed + " hook(s) cleared");
+              showToast("success", "已清除", completed + " 个 Hook 已清除");
             }
             if (typeof htmx !== "undefined") {
               htmx.trigger(document.body, "htmx:load");
@@ -1659,13 +1715,13 @@
     var submitBtn = document.getElementById("issue-submit-btn");
 
     if (!title) {
-      showToast("error", "Missing", "Title is required");
+      showToast("error", "缺少字段", "标题不能为空");
       return;
     }
 
     // Disable button while submitting
     submitBtn.disabled = true;
-    submitBtn.textContent = "Creating...";
+    submitBtn.textContent = "创建中...";
 
     var payload = {
       title: title,
@@ -1687,8 +1743,8 @@
         if (data.success) {
           showToast(
             "success",
-            "Created",
-            "Issue " + (data.id || "") + " created",
+            "已创建",
+            "Issue " + (data.id || "") + " 已创建",
           );
           closeIssueModal();
           // Trigger a page refresh to show the new issue
@@ -1696,15 +1752,15 @@
             htmx.trigger(document.body, "htmx:load");
           }
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       })
       .finally(function () {
         submitBtn.disabled = false;
-        submitBtn.textContent = "Create Issue";
+        submitBtn.textContent = "创建 Issue";
       });
   }
   window.submitIssue = submitIssue;
@@ -1823,7 +1879,7 @@
               "</span></td>" +
               '<td><button class="sling-btn" data-bead-id="' +
               escapeHtml(item.id) +
-              '" title="Sling to rig">Sling</button></td>';
+              '" title="分配到 Rig">Sling</button></td>';
             tbody.appendChild(tr);
           });
 
@@ -1835,7 +1891,7 @@
         }
       })
       .catch(function (err) {
-        loading.textContent = "Failed to load ready work";
+        loading.textContent = "就绪工作加载失败";
         console.error("Ready work load error:", err);
       });
   }
@@ -1903,7 +1959,7 @@
           document
             .getElementById("convoy-issues-empty")
             .querySelector("p").textContent =
-            data.error || "Failed to load convoy";
+            data.error || "Convoy 加载失败";
           return;
         }
 
@@ -1925,21 +1981,21 @@
             statusLower === "complete" ||
             statusLower === "done"
           ) {
-            statusBadge = '<span class="badge badge-green">Done</span>';
+            statusBadge = '<span class="badge badge-green">完成</span>';
           } else if (
             statusLower === "in_progress" ||
             statusLower === "in progress" ||
             statusLower === "working"
           ) {
-            statusBadge = '<span class="badge badge-yellow">In Progress</span>';
+            statusBadge = '<span class="badge badge-yellow">进行中</span>';
           } else if (statusLower === "open" || statusLower === "ready") {
-            statusBadge = '<span class="badge badge-blue">Open</span>';
+            statusBadge = '<span class="badge badge-blue">待处理</span>';
           } else if (statusLower === "blocked") {
-            statusBadge = '<span class="badge badge-red">Blocked</span>';
+            statusBadge = '<span class="badge badge-red">阻塞</span>';
           } else {
             statusBadge =
               '<span class="badge badge-muted">' +
-              escapeHtml(issue.status || "Unknown") +
+              escapeHtml(issue.status || "未知") +
               "</span>";
           }
 
@@ -1958,7 +2014,7 @@
               ? '<span class="badge badge-blue">' +
                 escapeHtml(issue.assignee) +
                 "</span>"
-              : '<span class="badge badge-muted">Unassigned</span>') +
+              : '<span class="badge badge-muted">未分配</span>') +
             "</td>" +
             "<td>" +
             escapeHtml(issue.progress || "") +
@@ -1972,7 +2028,7 @@
         document.getElementById("convoy-issues-empty").style.display = "block";
         document
           .getElementById("convoy-issues-empty")
-          .querySelector("p").textContent = "Error: " + err.message;
+          .querySelector("p").textContent = "错误：" + err.message;
       });
   }
 
@@ -2115,13 +2171,13 @@
         .value.trim();
 
       if (!name) {
-        showToast("error", "Missing", "Convoy name is required");
+        showToast("error", "缺少字段", "Convoy 名称不能为空");
         return;
       }
 
       var btn = document.getElementById("convoy-create-submit-btn");
       btn.disabled = true;
-      btn.textContent = "Creating...";
+      btn.textContent = "创建中...";
 
       // Build command: convoy create <name> [issue1 issue2 ...]
       var cmd = "convoy create " + name;
@@ -2139,21 +2195,21 @@
         })
         .then(function (data) {
           if (data.success) {
-            showToast("success", "Created", 'Convoy "' + name + '" created');
+            showToast("success", "已创建", 'Convoy "' + name + '" 已创建');
             cancelConvoyCreate();
             if (data.output && data.output.trim()) {
               showOutput(cmd, data.output);
             }
           } else {
-            showToast("error", "Failed", data.error || "Unknown error");
+            showToast("error", "失败", data.error || "未知错误");
           }
         })
         .catch(function (err) {
-          showToast("error", "Error", err.message);
+          showToast("error", "错误", err.message);
         })
         .finally(function () {
           btn.disabled = false;
-          btn.textContent = "Create Convoy";
+          btn.textContent = "创建 Convoy";
         });
     });
 
@@ -2199,13 +2255,13 @@
       .getElementById("convoy-add-issue-input")
       .value.trim();
     if (!issueId || !currentConvoyId) {
-      showToast("error", "Missing", "Issue ID is required");
+      showToast("error", "缺少字段", "Issue ID 不能为空");
       return;
     }
 
     var btn = document.getElementById("convoy-add-issue-submit");
     btn.disabled = true;
-    btn.textContent = "Adding...";
+    btn.textContent = "添加中...";
 
     var cmd = "convoy add " + currentConvoyId + " " + issueId;
 
@@ -2221,23 +2277,23 @@
         if (data.success) {
           showToast(
             "success",
-            "Added",
-            "Issue " + issueId + " added to convoy",
+            "已添加",
+            "Issue " + issueId + " 已添加到 Convoy",
           );
           document.getElementById("convoy-add-issue-form").style.display =
             "none";
           // Refresh the convoy detail view
           openConvoyDetail(currentConvoyId);
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       })
       .finally(function () {
         btn.disabled = false;
-        btn.textContent = "Add";
+        btn.textContent = "添加";
       });
   }
 
@@ -2299,7 +2355,7 @@
     window.pauseRefresh = true;
 
     // Show loading state
-    document.getElementById("mail-detail-subject").textContent = "Loading...";
+    document.getElementById("mail-detail-subject").textContent = "加载中...";
     document.getElementById("mail-detail-from").textContent = from || "";
     document.getElementById("mail-detail-body").textContent = "";
     document.getElementById("mail-detail-time").textContent = "";
@@ -2317,17 +2373,17 @@
       })
       .then(function (msg) {
         document.getElementById("mail-detail-subject").textContent =
-          msg.subject || "(no subject)";
+          msg.subject || "（无主题）";
         document.getElementById("mail-detail-from").textContent =
           msg.from || from;
         document.getElementById("mail-detail-body").textContent =
-          msg.body || "(no content)";
+          msg.body || "（无内容）";
         document.getElementById("mail-detail-time").textContent =
           msg.timestamp || "";
       })
       .catch(function (err) {
         document.getElementById("mail-detail-body").textContent =
-          "Error loading message: " + err.message;
+          "消息加载失败：" + err.message;
       });
   }
 
@@ -2362,7 +2418,7 @@
         ? subject
         : "Re: " + subject;
 
-      document.getElementById("mail-compose-title").textContent = "Reply";
+      document.getElementById("mail-compose-title").textContent = "回复";
       document.getElementById("compose-subject").value = replySubject;
       document.getElementById("compose-reply-to").value =
         currentMessageId || "";
@@ -2383,7 +2439,7 @@
       // Pause HTMX refresh while composing
       window.pauseRefresh = true;
 
-      document.getElementById("mail-compose-title").textContent = "New Message";
+      document.getElementById("mail-compose-title").textContent = "新消息";
       document.getElementById("compose-subject").value = "";
       document.getElementById("compose-body").value = "";
       document.getElementById("compose-reply-to").value = "";
@@ -2435,12 +2491,12 @@
       var replyTo = document.getElementById("compose-reply-to").value;
 
       if (!to || !subject) {
-        showToast("error", "Missing fields", "Please fill in To and Subject");
+        showToast("error", "缺少字段", "请填写收件人和主题");
         return;
       }
 
       var btn = document.getElementById("mail-send-btn");
-      btn.textContent = "Sending...";
+      btn.textContent = "发送中...";
       btn.disabled = true;
 
       fetch("/api/mail/send", {
@@ -2458,7 +2514,7 @@
         })
         .then(function (data) {
           if (data.success) {
-            showToast("success", "Sent", "Message sent to " + to);
+            showToast("success", "已发送", "消息已发送给 " + to);
             mailCompose.style.display = "none";
             mailList.style.display = "block";
             currentMessageId = null;
@@ -2469,16 +2525,16 @@
           } else {
             showToast(
               "error",
-              "Failed",
-              data.error || "Failed to send message",
+              "失败",
+              data.error || "消息发送失败",
             );
           }
         })
         .catch(function (err) {
-          showToast("error", "Error", err.message);
+          showToast("error", "错误", err.message);
         })
         .finally(function () {
-          btn.textContent = "Send";
+          btn.textContent = "发送";
           btn.disabled = false;
         });
     });
@@ -2489,7 +2545,7 @@
     var select = document.getElementById("compose-to");
 
     // Show loading state
-    select.innerHTML = '<option value="">⏳ Loading recipients...</option>';
+    select.innerHTML = '<option value="">加载收件人中...</option>';
     select.disabled = true;
 
     // If we have a selected value for reply, add it immediately so it's available
@@ -2497,7 +2553,7 @@
       var cleanValue = selectedValue.replace(/\/$/, "").trim();
       var opt = document.createElement("option");
       opt.value = cleanValue;
-      opt.textContent = cleanValue + " (replying to)";
+      opt.textContent = cleanValue + "（回复对象）";
       opt.selected = true;
       select.appendChild(opt);
       select.disabled = false;
@@ -2510,14 +2566,14 @@
       })
       .then(function (data) {
         // Clear loading state, rebuild options
-        select.innerHTML = '<option value="">Select recipient...</option>';
+        select.innerHTML = '<option value="">选择收件人...</option>';
 
         // Re-add reply-to if present
         if (selectedValue) {
           var cleanVal = selectedValue.replace(/\/$/, "").trim();
           var replyOpt = document.createElement("option");
           replyOpt.value = cleanVal;
-          replyOpt.textContent = cleanVal + " (replying to)";
+          replyOpt.textContent = cleanVal + "（回复对象）";
           replyOpt.selected = true;
           select.appendChild(replyOpt);
         }
@@ -2538,7 +2594,7 @@
 
           var opt = document.createElement("option");
           opt.value = name;
-          opt.textContent = name + (running ? " (● running)" : " (○ stopped)");
+          opt.textContent = name + (running ? "（运行中）" : "（已停止）");
           if (!running) opt.disabled = true;
           select.appendChild(opt);
         });
@@ -2548,7 +2604,7 @@
       .catch(function (err) {
         console.error("Failed to load agents for To dropdown:", err);
         select.innerHTML =
-          '<option value="">Failed to load recipients</option>';
+          '<option value="">收件人加载失败</option>';
         select.disabled = false;
       });
   }
@@ -2591,7 +2647,7 @@
     // Show loading state
     document.getElementById("issue-detail-id").textContent = issueId;
     document.getElementById("issue-detail-title-text").textContent =
-      "Loading...";
+      "加载中...";
     document.getElementById("issue-detail-description").textContent = "";
     document.getElementById("issue-detail-priority").textContent = "";
     document.getElementById("issue-detail-status").textContent = "";
@@ -2617,7 +2673,7 @@
       .then(function (data) {
         if (data.error) {
           document.getElementById("issue-detail-title-text").textContent =
-            "Error loading issue";
+            "Issue 加载失败";
           document.getElementById("issue-detail-description").textContent =
             data.error;
           return;
@@ -2626,9 +2682,9 @@
         document.getElementById("issue-detail-id").textContent =
           data.id || issueId;
         document.getElementById("issue-detail-title-text").textContent =
-          data.title || "(no title)";
+          data.title || "（无标题）";
         document.getElementById("issue-detail-description").textContent =
-          data.description || data.raw_output || "(no description)";
+          data.description || data.raw_output || "（无描述）";
 
         // Priority badge
         var priorityEl = document.getElementById("issue-detail-priority");
@@ -2654,15 +2710,15 @@
         // Meta info
         if (data.type) {
           document.getElementById("issue-detail-type").textContent =
-            "Type: " + data.type;
+            "类型：" + data.type;
         }
         if (data.owner) {
           document.getElementById("issue-detail-owner").textContent =
-            "Owner: " + data.owner;
+            "负责人：" + data.owner;
         }
         if (data.created) {
           document.getElementById("issue-detail-created").textContent =
-            "Created: " + data.created;
+            "创建时间：" + data.created;
         }
 
         // Render action buttons
@@ -2706,9 +2762,9 @@
       })
       .catch(function (err) {
         document.getElementById("issue-detail-title-text").textContent =
-          "Error";
+          "错误";
         document.getElementById("issue-detail-description").textContent =
-          "Failed to load issue: " + err.message;
+          "Issue 加载失败：" + err.message;
       });
   }
 
@@ -2747,17 +2803,17 @@
       html +=
         '<button class="issue-action-btn reopen" onclick="reopenIssue(\'' +
         escapeHtml(issueId) +
-        "')\">↺ Reopen</button>";
+        "')\">↺ 重新打开</button>";
     } else {
       html +=
         '<button class="issue-action-btn close" onclick="closeIssue(\'' +
         escapeHtml(issueId) +
-        "')\">Close</button>";
+        "')\">关闭</button>";
     }
 
     // Priority dropdown
     html += '<div class="issue-action-group">';
-    html += '<label class="issue-action-label">Priority</label>';
+    html += '<label class="issue-action-label">优先级</label>';
     html +=
       '<select class="issue-action-select" id="issue-action-priority" onchange="updateIssuePriority(\'' +
       escapeHtml(issueId) +
@@ -2766,12 +2822,12 @@
       var sel = p === priNum ? " selected" : "";
       var pLabel =
         p === 1
-          ? "P1 - Critical"
+          ? "P1 - 紧急"
           : p === 2
-            ? "P2 - High"
+            ? "P2 - 高"
             : p === 3
-              ? "P3 - Medium"
-              : "P4 - Low";
+              ? "P3 - 中"
+              : "P4 - 低";
       html += '<option value="' + p + '"' + sel + ">" + pLabel + "</option>";
     }
     html += "</select>";
@@ -2779,13 +2835,13 @@
 
     // Assignee dropdown
     html += '<div class="issue-action-group">';
-    html += '<label class="issue-action-label">Assign</label>';
+    html += '<label class="issue-action-label">分配给</label>';
     html +=
       '<select class="issue-action-select" id="issue-action-assignee" onchange="assignIssue(\'' +
       escapeHtml(issueId) +
       "', this.value)\">";
-    html += '<option value="">Unassigned</option>';
-    html += '<option value="" disabled>Loading agents...</option>';
+    html += '<option value="">未分配</option>';
+    html += '<option value="" disabled>加载智能体中...</option>';
     html += "</select>";
     html += "</div>";
 
@@ -2807,7 +2863,7 @@
       })
       .then(function (data) {
         // Rebuild dropdown
-        var html = '<option value="">Unassigned</option>';
+        var html = '<option value="">未分配</option>';
         var agents = data.agents || [];
         var polecats = data.polecats || [];
 
@@ -2845,15 +2901,15 @@
         select.innerHTML = html;
       })
       .catch(function () {
-        select.innerHTML = '<option value="">Unassigned</option>';
+        select.innerHTML = '<option value="">未分配</option>';
       });
   }
 
   // Close an issue
   function closeIssue(issueId) {
-    if (!confirm("Close issue " + issueId + "?")) return;
+    if (!confirm("确认关闭 Issue " + issueId + "？")) return;
 
-    showToast("info", "Closing...", issueId);
+    showToast("info", "关闭中...", issueId);
 
     fetch("/api/issues/close", {
       method: "POST",
@@ -2865,22 +2921,22 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Closed", issueId + " closed");
+          showToast("success", "已关闭", issueId + " 已关闭");
           // Re-fetch to update the detail view
           openIssueDetail(issueId);
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       });
   }
   window.closeIssue = closeIssue;
 
   // Reopen an issue
   function reopenIssue(issueId) {
-    showToast("info", "Reopening...", issueId);
+    showToast("info", "重新打开中...", issueId);
 
     fetch("/api/issues/update", {
       method: "POST",
@@ -2892,14 +2948,14 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Reopened", issueId + " reopened");
+          showToast("success", "已重新打开", issueId + " 已重新打开");
           openIssueDetail(issueId);
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       });
   }
   window.reopenIssue = reopenIssue;
@@ -2909,7 +2965,7 @@
     var priNum = parseInt(priority, 10);
     if (priNum < 1 || priNum > 4) return;
 
-    showToast("info", "Updating...", "Setting priority to P" + priNum);
+    showToast("info", "设置优先级中...", "设置优先级为 P" + priNum);
 
     fetch("/api/issues/update", {
       method: "POST",
@@ -2921,14 +2977,14 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Updated", "Priority set to P" + priNum);
+          showToast("success", "已更新", "优先级已设置为 P" + priNum);
           openIssueDetail(issueId);
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       });
   }
   window.updateIssuePriority = updateIssuePriority;
@@ -2937,7 +2993,7 @@
   function assignIssue(issueId, assignee) {
     if (!assignee) return; // Unassigned selected, no-op for now
 
-    showToast("info", "Assigning...", "Assigning to " + assignee);
+    showToast("info", "分配中...", "正在分配给 " + assignee);
 
     fetch("/api/issues/update", {
       method: "POST",
@@ -2949,14 +3005,14 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Assigned", "Assigned to " + assignee);
+          showToast("success", "已分配", "已分配给 " + assignee);
           openIssueDetail(issueId);
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message);
+        showToast("error", "错误", err.message);
       });
   }
   window.assignIssue = assignIssue;
@@ -2987,7 +3043,7 @@
     window.pauseRefresh = true;
 
     // Show loading state
-    document.getElementById("pr-detail-number").textContent = "Loading...";
+    document.getElementById("pr-detail-number").textContent = "加载中...";
     document.getElementById("pr-detail-title-text").textContent = "";
     document.getElementById("pr-detail-body").textContent = "";
     document.getElementById("pr-detail-state").textContent = "";
@@ -3015,7 +3071,7 @@
       .then(function (data) {
         if (data.error) {
           document.getElementById("pr-detail-title-text").textContent =
-            "Error loading PR";
+            "PR 加载失败";
           document.getElementById("pr-detail-body").textContent = data.error;
           return;
         }
@@ -3023,9 +3079,9 @@
         document.getElementById("pr-detail-number").textContent =
           "#" + data.number;
         document.getElementById("pr-detail-title-text").textContent =
-          data.title || "(no title)";
+          data.title || "（无标题）";
         document.getElementById("pr-detail-body").textContent =
-          data.body || "(no description)";
+          data.body || "（无描述）";
 
         // State badge
         var stateEl = document.getElementById("pr-detail-state");
@@ -3037,7 +3093,7 @@
         // Meta info
         if (data.author) {
           document.getElementById("pr-detail-author").textContent =
-            "by " + data.author;
+            "作者：" + data.author;
         }
         if (data.base_ref && data.head_ref) {
           document.getElementById("pr-detail-branches").textContent =
@@ -3046,7 +3102,7 @@
         if (data.created_at) {
           var created = new Date(data.created_at);
           document.getElementById("pr-detail-created").textContent =
-            "Created " + created.toLocaleDateString();
+            "创建于 " + created.toLocaleDateString();
         }
 
         // Stats
@@ -3060,7 +3116,7 @@
         }
         if (data.changed_files !== undefined) {
           document.getElementById("pr-detail-files").textContent =
-            data.changed_files + " files";
+            data.changed_files + " 个文件";
         }
 
         // Labels
@@ -3104,9 +3160,9 @@
         }
       })
       .catch(function (err) {
-        document.getElementById("pr-detail-title-text").textContent = "Error";
+        document.getElementById("pr-detail-title-text").textContent = "错误";
         document.getElementById("pr-detail-body").textContent =
-          "Failed to load PR: " + err.message;
+          "PR 加载失败：" + err.message;
       });
   }
 
@@ -3143,7 +3199,7 @@
     var dropdown = document.createElement("div");
     dropdown.className = "sling-dropdown";
     dropdown.innerHTML =
-      '<div class="sling-dropdown-loading">Loading rigs...</div>';
+      '<div class="sling-dropdown-loading">加载 Rig 中...</div>';
 
     // Position dropdown below the button
     var rect = btn.getBoundingClientRect();
@@ -3163,13 +3219,13 @@
         var rigs = data.rigs || [];
         if (rigs.length === 0) {
           dropdown.innerHTML =
-            '<div class="sling-dropdown-empty">No rigs available</div>';
+            '<div class="sling-dropdown-empty">暂无可用 Rig</div>';
           return;
         }
         var html =
-          '<div class="sling-dropdown-header">Sling ' +
+          '<div class="sling-dropdown-header">分配 ' +
           escapeHtml(beadId) +
-          " to:</div>";
+          " 到：</div>";
         for (var i = 0; i < rigs.length; i++) {
           html +=
             '<button class="sling-dropdown-item" data-rig="' +
@@ -3191,13 +3247,13 @@
       })
       .catch(function () {
         dropdown.innerHTML =
-          '<div class="sling-dropdown-empty">Failed to load rigs</div>';
+          '<div class="sling-dropdown-empty">Rig 加载失败</div>';
       });
   }
 
   function executeSling(beadId, rig) {
     var cmd = "sling " + beadId + " " + rig;
-    showToast("info", "Slinging...", beadId + " → " + rig);
+    showToast("info", "分配中...", beadId + " → " + rig);
 
     fetch("/api/run", {
       method: "POST",
@@ -3209,19 +3265,19 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Slung", beadId + " → " + rig);
+          showToast("success", "已分配", beadId + " → " + rig);
           if (data.output && data.output.trim()) {
             showOutput(cmd, data.output);
           }
         } else {
-          showToast("error", "Sling failed", data.error || "Unknown error");
+          showToast("error", "分配失败", data.error || "未知错误");
           if (data.output) {
             showOutput(cmd, data.output);
           }
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message || "Request failed");
+        showToast("error", "错误", err.message || "请求失败");
       });
   }
 
@@ -3262,13 +3318,13 @@
     // Ack or Resolve - run directly
     var cmdName = "escalate " + action + " " + id;
     btn.disabled = true;
-    btn.textContent = action === "ack" ? "Acking..." : "Resolving...";
+    btn.textContent = action === "ack" ? "确认中..." : "解决中...";
 
     runEscalationAction(cmdName, btn, action);
   });
 
   function runEscalationAction(cmdName, btn, action) {
-    showToast("info", "Running...", "gt " + cmdName);
+    showToast("info", "执行中...", "gt " + cmdName);
 
     fetch("/api/run", {
       method: "POST",
@@ -3280,7 +3336,7 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "Success", "gt " + cmdName);
+          showToast("success", "成功", "gt " + cmdName);
           // Remove ack button or fade row on resolve
           var row = btn.closest(".escalation-row");
           if (action === "resolve" && row) {
@@ -3291,15 +3347,15 @@
             btn.outerHTML = '<span class="badge badge-cyan">ACK</span>';
           }
         } else {
-          showToast("error", "Failed", data.error || "Unknown error");
+          showToast("error", "失败", data.error || "未知错误");
           btn.disabled = false;
-          btn.textContent = action === "ack" ? "Ack" : "Resolve";
+          btn.textContent = action === "ack" ? "确认" : "解决";
         }
       })
       .catch(function (err) {
-        showToast("error", "Error", err.message || "Request failed");
+        showToast("error", "错误", err.message || "请求失败");
         btn.disabled = false;
-        btn.textContent = action === "ack" ? "Ack" : "Resolve";
+        btn.textContent = action === "ack" ? "确认" : "解决";
       });
   }
 
@@ -3314,7 +3370,7 @@
     var picker = document.createElement("div");
     picker.className = "reassign-picker";
     picker.innerHTML =
-      '<select class="reassign-select"><option value="">Loading...</option></select>' +
+      '<select class="reassign-select"><option value="">加载中...</option></select>' +
       '<button class="esc-btn esc-reassign-confirm">Go</button>' +
       '<button class="esc-btn esc-reassign-cancel">X</button>';
     btn.parentNode.appendChild(picker);
@@ -3330,19 +3386,19 @@
         return r.json();
       })
       .then(function (data) {
-        select.innerHTML = '<option value="">Select agent...</option>';
+        select.innerHTML = '<option value="">选择智能体...</option>';
         var agents = data.agents || [];
         agents.forEach(function (agent) {
           var name = typeof agent === "string" ? agent : agent.name;
           var running = typeof agent === "object" ? agent.running : true;
           var opt = document.createElement("option");
           opt.value = name;
-          opt.textContent = name + (running ? "" : " (stopped)");
+          opt.textContent = name + (running ? "" : "（已停止）");
           select.appendChild(opt);
         });
       })
       .catch(function () {
-        select.innerHTML = '<option value="">Failed to load</option>';
+        select.innerHTML = '<option value="">加载失败</option>';
       });
 
     // Confirm reassign
@@ -3351,7 +3407,7 @@
       .addEventListener("click", function () {
         var agent = select.value;
         if (!agent) {
-          showToast("error", "Missing", "Select an agent to reassign to");
+          showToast("error", "缺少字段", "请选择要重新分配到的智能体");
           return;
         }
         picker.remove();
@@ -3359,9 +3415,9 @@
 
         var cmdName = "escalate reassign " + escalationId + " " + agent;
         btn.disabled = true;
-        btn.textContent = "Reassigning...";
+        btn.textContent = "重新分配中...";
 
-        showToast("info", "Running...", "gt " + cmdName);
+        showToast("info", "执行中...", "gt " + cmdName);
 
         fetch("/api/run", {
           method: "POST",
@@ -3375,8 +3431,8 @@
             if (data.success) {
               showToast(
                 "success",
-                "Reassigned",
-                "Escalation reassigned to " + agent,
+                "已重新分配",
+                "升级事件已重新分配给 " + agent,
               );
               var row = btn.closest(".escalation-row");
               if (row) {
@@ -3385,15 +3441,15 @@
                 if (fromCell) fromCell.textContent = "→ " + agent;
               }
             } else {
-              showToast("error", "Failed", data.error || "Unknown error");
+              showToast("error", "失败", data.error || "未知错误");
             }
             btn.disabled = false;
-            btn.textContent = "↻ Reassign";
+            btn.textContent = "↻ 重新分配";
           })
           .catch(function (err) {
-            showToast("error", "Error", err.message || "Request failed");
+            showToast("error", "错误", err.message || "请求失败");
             btn.disabled = false;
-            btn.textContent = "↻ Reassign";
+            btn.textContent = "↻ 重新分配";
           });
       });
 
@@ -3566,7 +3622,7 @@
     if (emptyState) emptyState.style.display = "none";
 
     nameEl.textContent = sessionName;
-    contentEl.textContent = "Loading...";
+    contentEl.textContent = "加载中...";
     statusEl.textContent = "";
     preview.style.display = "block";
 
@@ -3587,10 +3643,10 @@
       })
       .then(function (data) {
         if (data.error) {
-          contentEl.textContent = "Error: " + data.error;
+          contentEl.textContent = "错误：" + data.error;
           return;
         }
-        contentEl.textContent = data.content || "(empty)";
+        contentEl.textContent = data.content || "（空）";
         // Auto-scroll to bottom
         contentEl.scrollTop = contentEl.scrollHeight;
         // Show refresh timestamp
@@ -3603,10 +3659,10 @@
           ":" +
           (now.getSeconds() < 10 ? "0" : "") +
           now.getSeconds();
-        statusEl.textContent = "refreshed " + timeStr;
+        statusEl.textContent = "已刷新 " + timeStr;
       })
       .catch(function (err) {
-        contentEl.textContent = "Failed to load preview: " + err.message;
+        contentEl.textContent = "预览加载失败：" + err.message;
       });
   }
 
@@ -3681,7 +3737,7 @@
     var detailCell = document.createElement("td");
     detailCell.colSpan = 4;
     detailCell.innerHTML =
-      '<div class="tracked-issues"><div class="tracked-issues-loading">Loading tracked issues...</div></div>';
+      '<div class="tracked-issues"><div class="tracked-issues-loading">加载跟踪的 Issue 中...</div></div>';
     detailRow.appendChild(detailCell);
     row.parentNode.insertBefore(detailRow, row.nextSibling);
 
@@ -3705,8 +3761,8 @@
       .then(function (data) {
         if (!data.success) {
           detailCell.innerHTML =
-            '<div class="tracked-issues"><div class="tracked-issues-error">Failed to load: ' +
-            escapeHtml(data.error || "Unknown error") +
+            '<div class="tracked-issues"><div class="tracked-issues-error">加载失败：' +
+            escapeHtml(data.error || "未知错误") +
             "</div></div>";
           return;
         }
@@ -3716,12 +3772,12 @@
           renderConvoyIssues(detailCell, parsed);
         } catch (err) {
           detailCell.innerHTML =
-            '<div class="tracked-issues"><div class="tracked-issues-error">Failed to parse response</div></div>';
+            '<div class="tracked-issues"><div class="tracked-issues-error">响应解析失败</div></div>';
         }
       })
       .catch(function (err) {
         detailCell.innerHTML =
-          '<div class="tracked-issues"><div class="tracked-issues-error">Request failed: ' +
+          '<div class="tracked-issues"><div class="tracked-issues-error">请求失败：' +
           escapeHtml(err.message) +
           "</div></div>";
       });
@@ -3731,14 +3787,14 @@
     var issues = data.tracked || [];
     if (issues.length === 0) {
       cell.innerHTML =
-        '<div class="tracked-issues"><div class="tracked-issues-empty">No tracked issues</div></div>';
+        '<div class="tracked-issues"><div class="tracked-issues-empty">暂无跟踪的 Issue</div></div>';
       return;
     }
 
     var html = '<div class="tracked-issues">';
     html += '<table class="tracked-issues-table">';
     html +=
-      "<thead><tr><th>Status</th><th>ID</th><th>Title</th><th>Assignee</th><th>Progress</th></tr></thead>";
+      "<thead><tr><th>状态</th><th>ID</th><th>标题</th><th>负责人</th><th>进度</th></tr></thead>";
     html += "<tbody>";
 
     for (var i = 0; i < issues.length; i++) {
@@ -3748,16 +3804,16 @@
       var statusBadge = "";
       switch (issue.status) {
         case "closed":
-          statusBadge = '<span class="badge badge-green">Done</span>';
+          statusBadge = '<span class="badge badge-green">完成</span>';
           break;
         case "in_progress":
-          statusBadge = '<span class="badge badge-yellow">In Progress</span>';
+          statusBadge = '<span class="badge badge-yellow">进行中</span>';
           break;
         case "hooked":
-          statusBadge = '<span class="badge badge-blue">Hooked</span>';
+          statusBadge = '<span class="badge badge-blue">已挂载</span>';
           break;
         default:
-          statusBadge = '<span class="badge badge-muted">Open</span>';
+          statusBadge = '<span class="badge badge-muted">待处理</span>';
       }
 
       // Assignee - extract short name
@@ -3770,7 +3826,7 @@
       // Worker info as progress indicator
       var progress = "";
       if (issue.status === "closed") {
-        progress = '<span class="convoy-progress-done">Done</span>';
+        progress = '<span class="convoy-progress-done">完成</span>';
       } else if (issue.worker) {
         var workerName = issue.worker.split("/").pop();
         progress =
@@ -3820,12 +3876,13 @@
       '%;"></div></div>';
     html +=
       '<span class="tracked-issues-progress-text">' +
+      "已完成 " +
       completed +
       "/" +
       total +
-      " completed (" +
+      "（" +
       pct +
-      "%)</span>";
+      "%）</span>";
     html += "</div>";
 
     html += "</div>";

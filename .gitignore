@@ -73,3 +73,5 @@ result
 tasks
 internal/events/refinery
 internal/events/witness
+.playwright-mcp/
+screenshots/

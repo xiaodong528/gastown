@@ -26,72 +26,72 @@ type CommandMeta struct {
 // Commands not in this list are blocked for security.
 var AllowedCommands = map[string]CommandMeta{
 	// === Read-only commands (always safe) ===
-	"status":      {Safe: true, Desc: "Show town status", Category: "Status"},
-	"agents list": {Safe: true, Desc: "List active agents", Category: "Status"},
-	"convoy list": {Safe: true, Desc: "List convoys", Category: "Convoys"},
-	"convoy show":   {Safe: true, Desc: "Show convoy details", Category: "Convoys", Args: "<convoy-id>", ArgType: "convoys"},
-	"convoy status": {Safe: true, Desc: "Show convoy status with tracked issues", Category: "Convoys", Args: "<convoy-id> --json", ArgType: "convoys"},
-	"mail inbox":  {Safe: true, Desc: "Check inbox", Category: "Mail"},
-	"mail check":  {Safe: true, Desc: "Check for new mail", Category: "Mail"},
-	"mail peek":   {Safe: true, Desc: "Peek at message", Category: "Mail", Args: "<message-id>"},
-	"rig list":    {Safe: true, Desc: "List rigs", Category: "Rigs"},
-	"rig show":    {Safe: true, Desc: "Show rig details", Category: "Rigs", Args: "<rig-name>", ArgType: "rigs"},
-	"doctor":      {Safe: true, Desc: "Health check", Category: "Diagnostics"},
-	"hooks list":  {Safe: true, Desc: "List hooks", Category: "Hooks"},
-	"activity":    {Safe: true, Desc: "Show recent activity", Category: "Status"},
-	"info":        {Safe: true, Desc: "Show workspace info", Category: "Status"},
-	"log":         {Safe: true, Desc: "View logs", Category: "Diagnostics"},
-	"audit":       {Safe: true, Desc: "View audit log", Category: "Diagnostics"},
+	"status":      {Safe: true, Desc: "显示工作空间状态", Category: "状态"},
+	"agents list": {Safe: true, Desc: "列出活跃智能体", Category: "状态"},
+	"convoy list": {Safe: true, Desc: "列出 Convoy", Category: "Convoy"},
+	"convoy show":   {Safe: true, Desc: "查看 Convoy 详情", Category: "Convoy", Args: "<convoy-id>", ArgType: "convoys"},
+	"convoy status": {Safe: true, Desc: "显示 Convoy 状态与跟踪的 Issue", Category: "Convoy", Args: "<convoy-id> --json", ArgType: "convoys"},
+	"mail inbox":  {Safe: true, Desc: "查看收件箱", Category: "邮件"},
+	"mail check":  {Safe: true, Desc: "检查新邮件", Category: "邮件"},
+	"mail peek":   {Safe: true, Desc: "预览消息", Category: "邮件", Args: "<message-id>"},
+	"rig list":    {Safe: true, Desc: "列出 Rig", Category: "Rig"},
+	"rig show":    {Safe: true, Desc: "查看 Rig 详情", Category: "Rig", Args: "<rig-name>", ArgType: "rigs"},
+	"doctor":      {Safe: true, Desc: "健康检查", Category: "诊断"},
+	"hooks list":  {Safe: true, Desc: "列出 Hook", Category: "Hook"},
+	"activity":    {Safe: true, Desc: "显示近期活动", Category: "状态"},
+	"info":        {Safe: true, Desc: "显示工作空间信息", Category: "状态"},
+	"log":         {Safe: true, Desc: "查看日志", Category: "诊断"},
+	"audit":       {Safe: true, Desc: "查看审计日志", Category: "诊断"},
 
 	// Polecat read-only
-	"polecat list --all": {Safe: true, Desc: "List all polecats", Category: "Polecats"},
-	"polecat show":       {Safe: true, Desc: "Show polecat details", Category: "Polecats", Args: "<rig>/<name>", ArgType: "polecats"},
+	"polecat list --all": {Safe: true, Desc: "列出所有 Polecat", Category: "Polecat"},
+	"polecat show":       {Safe: true, Desc: "查看 Polecat 详情", Category: "Polecat", Args: "<rig>/<name>", ArgType: "polecats"},
 
 	// Crew read-only
-	"crew list --all": {Safe: true, Desc: "List all crew members", Category: "Crew"},
-	"crew show":       {Safe: true, Desc: "Show crew details", Category: "Crew", Args: "<rig>/<name>", ArgType: "crew"},
+	"crew list --all": {Safe: true, Desc: "列出所有 Crew 成员", Category: "Crew"},
+	"crew show":       {Safe: true, Desc: "查看 Crew 详情", Category: "Crew", Args: "<rig>/<name>", ArgType: "crew"},
 
 	// === Action commands (require confirmation) ===
 
 	// Mail actions
-	"mail send":      {Confirm: true, Desc: "Send message", Category: "Mail", Args: "<address> -s <subject> -m <message>", ArgType: "agents"},
-	"mail mark-read": {Confirm: false, Desc: "Mark as read", Category: "Mail", Args: "<message-id>", ArgType: "messages"},
-	"mail archive":   {Confirm: false, Desc: "Archive message", Category: "Mail", Args: "<message-id>", ArgType: "messages"},
-	"mail reply":     {Confirm: true, Desc: "Reply to message", Category: "Mail", Args: "<message-id> -m <message>", ArgType: "messages"},
+	"mail send":      {Confirm: true, Desc: "发送消息", Category: "邮件", Args: "<address> -s <subject> -m <message>", ArgType: "agents"},
+	"mail mark-read": {Confirm: false, Desc: "标记为已读", Category: "邮件", Args: "<message-id>", ArgType: "messages"},
+	"mail archive":   {Confirm: false, Desc: "归档消息", Category: "邮件", Args: "<message-id>", ArgType: "messages"},
+	"mail reply":     {Confirm: true, Desc: "回复消息", Category: "邮件", Args: "<message-id> -m <message>", ArgType: "messages"},
 
 	// Escalation actions
-	"escalate ack":      {Confirm: true, Desc: "Acknowledge escalation", Category: "Escalations", Args: "<escalation-id>", ArgType: "escalations"},
-	"escalate resolve":  {Confirm: true, Desc: "Resolve escalation", Category: "Escalations", Args: "<escalation-id>", ArgType: "escalations"},
-	"escalate reassign": {Confirm: true, Desc: "Reassign escalation", Category: "Escalations", Args: "<escalation-id> <agent>", ArgType: "escalations"},
+	"escalate ack":      {Confirm: true, Desc: "确认升级事件", Category: "升级事件", Args: "<escalation-id>", ArgType: "escalations"},
+	"escalate resolve":  {Confirm: true, Desc: "解决升级事件", Category: "升级事件", Args: "<escalation-id>", ArgType: "escalations"},
+	"escalate reassign": {Confirm: true, Desc: "重新分配升级事件", Category: "升级事件", Args: "<escalation-id> <agent>", ArgType: "escalations"},
 
 	// Convoy actions
-	"convoy create":  {Confirm: true, Desc: "Create convoy", Category: "Convoys", Args: "<name>"},
-	"convoy refresh": {Confirm: false, Desc: "Refresh convoy", Category: "Convoys", Args: "<convoy-id>", ArgType: "convoys"},
-	"convoy add":     {Confirm: true, Desc: "Add issue to convoy", Category: "Convoys", Args: "<convoy-id> <issue>", ArgType: "convoys"},
+	"convoy create":  {Confirm: true, Desc: "创建 Convoy", Category: "Convoy", Args: "<name>"},
+	"convoy refresh": {Confirm: false, Desc: "刷新 Convoy", Category: "Convoy", Args: "<convoy-id>", ArgType: "convoys"},
+	"convoy add":     {Confirm: true, Desc: "添加 Issue 到 Convoy", Category: "Convoy", Args: "<convoy-id> <issue>", ArgType: "convoys"},
 
 	// Rig actions
-	"rig boot":  {Confirm: true, Desc: "Boot rig", Category: "Rigs", Args: "<rig-name>", ArgType: "rigs"},
-	"rig start": {Confirm: true, Desc: "Start rig", Category: "Rigs", Args: "<rig-name>", ArgType: "rigs"},
+	"rig boot":  {Confirm: true, Desc: "启动 Rig", Category: "Rig", Args: "<rig-name>", ArgType: "rigs"},
+	"rig start": {Confirm: true, Desc: "启动 Rig", Category: "Rig", Args: "<rig-name>", ArgType: "rigs"},
 
 	// Agent lifecycle (careful)
-	"witness start":  {Confirm: true, Desc: "Start witness", Category: "Agents", Args: "<rig-name>", ArgType: "rigs"},
-	"refinery start": {Confirm: true, Desc: "Start refinery", Category: "Agents", Args: "<rig-name>", ArgType: "rigs"},
-	"mayor attach":   {Confirm: true, Desc: "Attach mayor", Category: "Agents"},
-	"deacon start":   {Confirm: true, Desc: "Start deacon", Category: "Agents"},
+	"witness start":  {Confirm: true, Desc: "启动 Witness", Category: "智能体", Args: "<rig-name>", ArgType: "rigs"},
+	"refinery start": {Confirm: true, Desc: "启动 Refinery", Category: "智能体", Args: "<rig-name>", ArgType: "rigs"},
+	"mayor attach":   {Confirm: true, Desc: "连接 Mayor", Category: "智能体"},
+	"deacon start":   {Confirm: true, Desc: "启动 Deacon", Category: "智能体"},
 
 	// Polecat actions
-	"polecat add":    {Confirm: true, Desc: "Add polecat", Category: "Polecats", Args: "<rig> <name>", ArgType: "rigs"},
-	"polecat remove": {Confirm: true, Desc: "Remove polecat", Category: "Polecats", Args: "<rig>/<name>", ArgType: "polecats"},
+	"polecat add":    {Confirm: true, Desc: "添加 Polecat", Category: "Polecat", Args: "<rig> <name>", ArgType: "rigs"},
+	"polecat remove": {Confirm: true, Desc: "移除 Polecat", Category: "Polecat", Args: "<rig>/<name>", ArgType: "polecats"},
 
 	// Work assignment
-	"sling":       {Confirm: true, Desc: "Assign work to agent", Category: "Work", Args: "<bead> <rig>", ArgType: "hooks"},
-	"unsling":     {Confirm: true, Desc: "Unassign work from agent", Category: "Work", Args: "<bead>", ArgType: "hooks"},
-	"hook attach": {Confirm: true, Desc: "Attach hook", Category: "Hooks", Args: "<bead>", ArgType: "hooks"},
-	"hook detach": {Confirm: true, Desc: "Detach hook", Category: "Hooks", Args: "<bead>", ArgType: "hooks"},
+	"sling":       {Confirm: true, Desc: "分配工作给智能体", Category: "工作", Args: "<bead> <rig>", ArgType: "hooks"},
+	"unsling":     {Confirm: true, Desc: "取消分配工作", Category: "工作", Args: "<bead>", ArgType: "hooks"},
+	"hook attach": {Confirm: true, Desc: "挂载 Hook", Category: "Hook", Args: "<bead>", ArgType: "hooks"},
+	"hook detach": {Confirm: true, Desc: "卸载 Hook", Category: "Hook", Args: "<bead>", ArgType: "hooks"},
 
 	// Notifications
-	"notify":    {Confirm: true, Desc: "Send notification", Category: "Notifications", Args: "<message>"},
-	"broadcast": {Confirm: true, Desc: "Broadcast message", Category: "Notifications", Args: "<message>"},
+	"notify":    {Confirm: true, Desc: "发送通知", Category: "通知", Args: "<message>"},
+	"broadcast": {Confirm: true, Desc: "广播消息", Category: "通知", Args: "<message>"},
 }
 
 // BlockedPatterns are regex patterns for commands that should never run from the dashboard.
