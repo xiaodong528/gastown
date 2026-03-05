@@ -1,39 +1,47 @@
         :root {
-            --bg-dark: #0f1419;
-            --bg-card: #1a1f26;
-            --bg-card-hover: #242b33;
-            --text-primary: #e6e1cf;
-            --text-secondary: #6c7680;
-            --text-muted: #4a5159;
-            --border: #2d363f;
-            --border-accent: #3d4752;
-            --green: #c2d94c;
-            --yellow: #ffb454;
-            --red: #f07178;
-            --blue: #59c2ff;
-            --purple: #d2a6ff;
-            --cyan: #95e6cb;
-            --orange: #ff8f40;
-            --pink: #ff79c6;
-        }
-
-        html[data-theme="light"] {
-            --bg-dark: #f5f6f8;
+            /* JuZhi Light Theme (default) */
+            --bg-dark: #EEF6FB;
             --bg-card: #ffffff;
-            --bg-card-hover: #f0f1f3;
-            --text-primary: #1a1f26;
-            --text-secondary: #5a6370;
-            --text-muted: #8c939d;
-            --border: #d8dce2;
-            --border-accent: #c0c6ce;
-            --green: #3d8c40;
-            --yellow: #c07d1a;
-            --red: #d63d3d;
-            --blue: #1a73e8;
-            --purple: #7c3aed;
+            --bg-card-hover: #f0f3fa;
+            --text-primary: #374057;
+            --text-secondary: #475067;
+            --text-muted: #646D84;
+            --border: #d0d8ef;
+            --border-accent: #A7B7EB;
+            --green: #16a34a;
+            --yellow: #ca8a04;
+            --red: #dc2626;
+            --blue: #4B72EF;
+            --purple: #998DF4;
             --cyan: #0891b2;
             --orange: #c05621;
             --pink: #c2185b;
+            /* JuZhi brand tokens */
+            --jz-primary-dark: #373B61;
+            --jz-primary-blue: #4B72EF;
+            --jz-glow-purple: #998DF4;
+            --jz-glow-peach: #F4BFA6;
+            --font-mono: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+        }
+
+        html[data-theme="dark"] {
+            /* JuZhi Dark Theme */
+            --bg-dark: #1a1e35;
+            --bg-card: #252a45;
+            --bg-card-hover: #2f3555;
+            --text-primary: #e4e8f1;
+            --text-secondary: #9aa0b8;
+            --text-muted: #646d84;
+            --border: #3a4060;
+            --border-accent: #4a5278;
+            --green: #4ade80;
+            --yellow: #fbbf24;
+            --red: #f87171;
+            --blue: #4B72EF;
+            --purple: #998DF4;
+            --cyan: #67e8f9;
+            --orange: #fb923c;
+            --pink: #f472b6;
         }
 
         * {
@@ -43,7 +51,7 @@
         }
 
         body {
-            font-family: 'SF Mono', 'Menlo', 'Monaco', 'Consolas', monospace;
+            font-family: 'PingFang SC', -apple-system, 'Microsoft YaHei', 'Segoe UI', sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             padding: 16px;
@@ -51,6 +59,14 @@
             font-size: 13px;
             line-height: 1.5;
             transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Monospace for data display elements */
+        .convoy-id, .hook-id, .issue-id, .polecat-name,
+        .status-hint, .output-panel-content, .session-preview-content,
+        .convoy-add-issue-input, .command-palette-input,
+        td code, .tracked-issue-assignee {
+            font-family: var(--font-mono);
         }
 
         .dashboard {
@@ -63,18 +79,31 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 12px;
+            background: hsla(0, 0%, 100%, 0.5);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+        }
+
+        html[data-theme="dark"] header {
+            background: hsla(0, 0%, 100%, 0.08);
         }
 
         .ascii-title {
-            font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
-            font-size: 10px;
-            line-height: 1.1;
-            color: var(--cyan);
+            font-family: 'PingFang SC', sans-serif;
+            font-size: 1.4rem;
+            line-height: 1.3;
+            font-weight: 700;
+            color: var(--jz-primary-dark);
             margin: 0;
-            white-space: pre;
-            text-shadow: 0 0 10px var(--cyan);
+            white-space: nowrap;
+            letter-spacing: 0.05em;
+        }
+
+        html[data-theme="dark"] .ascii-title {
+            color: #e4e8f1;
         }
 
         h1 {
@@ -113,8 +142,13 @@
         .panel {
             background: var(--bg-card);
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: 12px;
             overflow: hidden;
+            transition: box-shadow 0.3s ease;
+        }
+
+        .panel:hover {
+            box-shadow: 0 0 20px rgba(153, 141, 244, 0.1), 0 0 40px rgba(244, 191, 166, 0.05);
         }
 
         .panel-full {
@@ -128,6 +162,7 @@
             padding: 10px 14px;
             background: var(--bg-dark);
             border-bottom: 1px solid var(--border);
+            border-radius: 12px 12px 0 0;
         }
 
         .panel-header h2 {
@@ -185,7 +220,7 @@
         .badge {
             display: inline-block;
             padding: 2px 6px;
-            border-radius: 3px;
+            border-radius: 6px;
             font-size: 0.65rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -289,9 +324,9 @@
         }
 
         .convoy-add-issue-btn {
-            background: var(--green);
+            background: var(--jz-primary-dark);
             border: none;
-            border-radius: 4px;
+            border-radius: 20px;
             color: var(--bg-dark);
             cursor: pointer;
             font-size: 0.75rem;
@@ -301,7 +336,7 @@
         }
 
         .convoy-add-issue-btn:hover {
-            background: var(--cyan);
+            background: var(--jz-primary-blue);
         }
 
         .convoy-add-issue-form {
@@ -344,9 +379,9 @@
 
         /* New Convoy button */
         .new-convoy-btn {
-            background: var(--green);
+            background: var(--jz-primary-dark);
             border: none;
-            border-radius: 4px;
+            border-radius: 20px;
             color: var(--bg-dark);
             cursor: pointer;
             font-size: 0.75rem;
@@ -357,7 +392,7 @@
         }
 
         .new-convoy-btn:hover {
-            background: var(--cyan);
+            background: var(--jz-primary-blue);
             color: var(--bg-dark);
             transform: scale(1.05);
         }
@@ -382,7 +417,7 @@
         }
 
         .convoy-expanded {
-            background: rgba(89, 194, 255, 0.06);
+            background: rgba(75, 114, 239, 0.06);
         }
 
         /* Convoy detail row (expanded sub-table) */
@@ -431,17 +466,17 @@
             letter-spacing: 0.05em;
             padding: 4px 10px;
             border-bottom: 1px solid var(--border);
-            background: rgba(0, 0, 0, 0.2);
+            background: var(--bg-dark);
         }
 
         .tracked-issues-table td {
             padding: 5px 10px;
             font-size: 0.8rem;
-            border-bottom: 1px solid rgba(45, 54, 63, 0.5);
+            border-bottom: 1px solid var(--border);
         }
 
         .tracked-issue-row:hover {
-            background: rgba(89, 194, 255, 0.06);
+            background: rgba(75, 114, 239, 0.06);
         }
 
         .tracked-issue-row.tracked-issue-closed {
@@ -2641,10 +2676,6 @@
         .theme-toggle-btn:hover {
             background: var(--bg-card-hover);
             border-color: var(--border-accent);
-        }
-
-        html[data-theme="light"] .ascii-title {
-            text-shadow: none;
         }
 
         .command-palette-overlay {

@@ -232,7 +232,7 @@ func TestConvoyTemplate_EmptyState(t *testing.T) {
 	output := buf.String()
 
 	// Check for empty state message
-	if !strings.Contains(output, "暂无活跃 Convoy") {
+	if !strings.Contains(output, "No active Convoy") {
 		t.Error("Template should show empty state message when no convoys")
 	}
 }

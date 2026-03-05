@@ -194,7 +194,7 @@ func TestConvoyHandler_EmptyConvoys(t *testing.T) {
 	}
 
 	body := w.Body.String()
-	if !strings.Contains(body, "暂无活跃 Convoy") {
+	if !strings.Contains(body, "No active Convoy") {
 		t.Error("Response should show empty state message")
 	}
 }
@@ -275,7 +275,7 @@ func TestConvoyHandler_FetchConvoysError(t *testing.T) {
 
 	body := w.Body.String()
 	// Should show the empty state for convoys section
-	if !strings.Contains(body, "暂无活跃 Convoy") {
+	if !strings.Contains(body, "No active Convoy") {
 		t.Error("Response should show empty state when fetch fails")
 	}
 }
@@ -324,7 +324,7 @@ func TestConvoyHandler_MergeQueueRendering(t *testing.T) {
 	body := w.Body.String()
 
 	// Check merge queue section header
-	if !strings.Contains(body, "合并队列") {
+	if !strings.Contains(body, "Merge Queue") {
 		t.Error("Response should contain merge queue section header")
 	}
 
@@ -342,11 +342,11 @@ func TestConvoyHandler_MergeQueueRendering(t *testing.T) {
 	}
 
 	// Check CI status badges (now display text, not classes)
-	if !strings.Contains(body, "CI 通过") {
-		t.Error("Response should contain 'CI 通过' text for passing PR")
+	if !strings.Contains(body, "CI Passed") {
+		t.Error("Response should contain 'CI Passed' text for passing PR")
 	}
-	if !strings.Contains(body, "CI 运行中") {
-		t.Error("Response should contain 'CI 运行中' text for pending PR")
+	if !strings.Contains(body, "CI Running") {
+		t.Error("Response should contain 'CI Running' text for pending PR")
 	}
 }
 
@@ -369,7 +369,7 @@ func TestConvoyHandler_EmptyMergeQueue(t *testing.T) {
 	body := w.Body.String()
 
 	// Should show empty state for merge queue
-	if !strings.Contains(body, "队列中暂无 PR") {
+	if !strings.Contains(body, "No PR in queue") {
 		t.Error("Response should show empty merge queue message")
 	}
 }
@@ -448,11 +448,11 @@ func TestConvoyHandler_WorkStatusRendering(t *testing.T) {
 		wantClass      string
 		wantStatusText string
 	}{
-		{"complete status", "complete", "badge-green", "完成"},
-		{"active status", "active", "badge-green", "活跃"},
-		{"stale status", "stale", "badge-yellow", "过期"},
-		{"stuck status", "stuck", "badge-red", "卡住"},
-		{"waiting status", "waiting", "badge-muted", "等待"},
+		{"complete status", "complete", "badge-green", "Done"},
+		{"active status", "active", "badge-green", "Active"},
+		{"stale status", "stale", "badge-yellow", "Stale"},
+		{"stuck status", "stuck", "badge-red", "Stuck"},
+		{"waiting status", "waiting", "badge-muted", "Waiting"},
 	}
 
 	for _, tt := range tests {
@@ -640,7 +640,7 @@ func TestConvoyHandler_FullDashboard(t *testing.T) {
 	if !strings.Contains(body, "hq-cv-full") {
 		t.Error("Response should contain convoy data")
 	}
-	if !strings.Contains(body, "合并队列") {
+	if !strings.Contains(body, "Merge Queue") {
 		t.Error("Response should contain merge queue section")
 	}
 	if !strings.Contains(body, "#789") {
@@ -737,7 +737,7 @@ func TestE2E_Server_FullDashboard(t *testing.T) {
 		{"Convoy section", "Convoy（任务批次）"},
 		{"Convoy ID", "hq-cv-e2e"},
 		{"Convoy progress", "2/4"},
-		{"Merge queue section", "合并队列"},
+		{"Merge queue section", "Merge Queue"},
 		{"PR number", "#101"},
 		{"PR repo", "roxas"},
 		{"Polecats section", "Polecat（工作智能体）"},
@@ -828,13 +828,13 @@ func TestE2E_Server_MergeQueueEmpty(t *testing.T) {
 	body := string(bodyBytes)
 
 	// Section header should always be visible
-	if !strings.Contains(body, "合并队列") {
+	if !strings.Contains(body, "Merge Queue") {
 		t.Error("Merge queue section should always be visible")
 	}
 
 	// Empty state message
-	if !strings.Contains(body, "队列中暂无 PR") {
-		t.Error("Should show '队列中暂无 PR' when empty")
+	if !strings.Contains(body, "No PR in queue") {
+		t.Error("Should show 'No PR in queue' when empty")
 	}
 }
 
@@ -848,10 +848,10 @@ func TestE2E_Server_MergeQueueStatuses(t *testing.T) {
 		wantCI     string
 		wantMerge  string
 	}{
-		{"green when ready", "pass", "ready", "mq-green", "CI 通过", "就绪"},
-		{"red when CI fails", "fail", "ready", "mq-red", "CI 失败", "就绪"},
-		{"red when conflict", "pass", "conflict", "mq-red", "CI 通过", "冲突"},
-		{"yellow when pending", "pending", "pending", "mq-yellow", "CI 运行中", "等待中"},
+		{"green when ready", "pass", "ready", "mq-green", "CI Passed", "Ready"},
+		{"red when CI fails", "fail", "ready", "mq-red", "CI Failed", "Ready"},
+		{"red when conflict", "pass", "conflict", "mq-red", "CI Passed", "Conflict"},
+		{"yellow when pending", "pending", "pending", "mq-yellow", "CI Running", "Pending"},
 	}
 
 	for _, tt := range tests {
@@ -926,7 +926,7 @@ func TestE2E_Server_HTMLStructure(t *testing.T) {
 		"<!DOCTYPE html>",
 		"<html",
 		"<head>",
-		"<title>JoinAI 多智能体编排工厂 - 控制中心</title>",
+		"<title>聚智JoinAI Swarm· 多智能体编排控制中心</title>",
 		"htmx.org",
 		"<body>",
 		"</body>",

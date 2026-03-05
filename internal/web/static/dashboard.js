@@ -23,14 +23,14 @@
   var THEME_STORAGE_KEY = "gt-theme";
 
   function getCurrentTheme() {
-    return document.documentElement.getAttribute("data-theme") === "light"
-      ? "light"
-      : "dark";
+    return document.documentElement.getAttribute("data-theme") === "dark"
+      ? "dark"
+      : "light";
   }
 
   function applyTheme(theme) {
-    if (theme === "light") {
-      document.documentElement.setAttribute("data-theme", "light");
+    if (theme === "dark") {
+      document.documentElement.setAttribute("data-theme", "dark");
     } else {
       document.documentElement.removeAttribute("data-theme");
     }
@@ -54,14 +54,14 @@
   updateThemeIcon();
 
   window
-    .matchMedia("(prefers-color-scheme: light)")
+    .matchMedia("(prefers-color-scheme: dark)")
     .addEventListener("change", function (e) {
       var stored = null;
       try {
         stored = localStorage.getItem(THEME_STORAGE_KEY);
       } catch (err) {}
       if (!stored) {
-        applyTheme(e.matches ? "light" : "dark");
+        applyTheme(e.matches ? "dark" : "light");
       }
     });
 
@@ -122,15 +122,15 @@
     if (!el) return;
     switch (state) {
       case "live":
-        el.textContent = "已连接";
+        el.textContent = "Connected（已连接）";
         el.className = "connection-live";
         break;
       case "reconnecting":
-        el.textContent = "重新连接中...";
+        el.textContent = "Reconnecting...（重新连接中）";
         el.className = "connection-reconnecting";
         break;
       default:
-        el.textContent = "连接中...";
+        el.textContent = "Connecting...（连接中）";
         el.className = "";
     }
   }
@@ -151,17 +151,17 @@
 
     if (panel.classList.contains("expanded")) {
       panel.classList.remove("expanded");
-      btn.textContent = "展开";
+      btn.textContent = "Expand（展开）";
       // Resume refresh when panel is collapsed
       window.pauseRefresh = false;
     } else {
       document.querySelectorAll(".panel.expanded").forEach(function (p) {
         p.classList.remove("expanded");
         var b = p.querySelector(".expand-btn");
-        if (b) b.textContent = "展开";
+        if (b) b.textContent = "Expand（展开）";
       });
       panel.classList.add("expanded");
-      btn.textContent = "关闭";
+      btn.textContent = "Close（关闭）";
       // Pause refresh while panel is expanded
       window.pauseRefresh = true;
     }
@@ -358,7 +358,7 @@
 
   document.getElementById("output-copy-btn").onclick = function () {
     navigator.clipboard.writeText(outputContent.textContent).then(function () {
-      showToast("success", "已复制", "输出已复制到剪贴板");
+      showToast("success", "Copied（已复制）", "Output copied to clipboard（输出已复制到剪贴板）");
     });
   };
 
@@ -371,7 +371,7 @@
       allCommands = data.commands || [];
     })
     .catch(function () {
-      console.error("命令加载失败");
+      console.error("Command loading failed（命令加载失败）");
     });
 
   // Fetch dynamic options (rigs, polecats, convoys, agents, hooks)
@@ -385,7 +385,7 @@
         return data;
       })
       .catch(function () {
-        console.error("选项加载失败");
+        console.error("Options loading failed（选项加载失败）");
         return null;
       });
   }
@@ -504,7 +504,7 @@
             (field.flag || "") +
             '">';
           formHtml +=
-            '<option value="">选择 ' +
+            '<option value="">Select（选择）' +
             escapeHtml(field.name) +
             "...</option>";
           for (var j = 0; j < options.length; j++) {
@@ -532,7 +532,7 @@
             fieldId +
             '" class="command-field-input" data-flag="' +
             (field.flag || "") +
-            '" placeholder="暂无可用的 ' +
+            '" placeholder="No available（暂无可用的）' +
             escapeHtml(pendingCommand.argType) +
             '">';
         } else if (isMessageField) {
@@ -541,7 +541,7 @@
             fieldId +
             '" class="command-field-textarea" data-flag="' +
             (field.flag || "") +
-            '" placeholder="输入 ' +
+            '" placeholder="Enter（输入）' +
             escapeHtml(field.name) +
             '..." rows="3"></textarea>';
         } else {
@@ -550,7 +550,7 @@
             fieldId +
             '" class="command-field-input" data-flag="' +
             (field.flag || "") +
-            '" placeholder="输入 ' +
+            '" placeholder="Enter（输入）' +
             escapeHtml(field.name) +
             '...">';
         }
@@ -569,8 +569,8 @@
 
       formHtml +=
         '<div class="command-args-actions">' +
-        '<button id="command-args-run" class="command-args-btn run">执行</button>' +
-        '<button id="command-args-cancel" class="command-args-btn cancel">取消</button>' +
+        '<button id="command-args-run" class="command-args-btn run">Run（执行）</button>' +
+        '<button id="command-args-cancel" class="command-args-btn cancel">Cancel（取消）</button>' +
         "</div></div>";
 
       resultsDiv.innerHTML = formHtml;
@@ -586,7 +586,7 @@
       if (runBtn) {
         runBtn.onclick = function () {
           runBtn.classList.add("loading");
-          runBtn.textContent = "执行中";
+          runBtn.textContent = "Running...（执行中）";
           runWithArgsFromForm(argFields.length || 1);
         };
       }
@@ -611,7 +611,7 @@
 
     if (visibleCommands.length === 0) {
       resultsDiv.innerHTML =
-        '<div class="command-palette-empty">没有匹配的命令</div>';
+        '<div class="command-palette-empty">No matching commands（没有匹配的命令）</div>';
       return;
     }
     var currentQuery = searchInput ? searchInput.value.trim() : "";
@@ -749,7 +749,7 @@
         if (recentCmd) recentItems.push(recentCmd);
       }
       if (recentItems.length > 0) {
-        visibleCommands.push({ _section: "最近使用" });
+        visibleCommands.push({ _section: "Recent（最近使用）" });
         for (var ri2 = 0; ri2 < recentItems.length; ri2++) {
           var rcmd = Object.assign({}, recentItems[ri2], { _recent: true });
           visibleCommands.push(rcmd);
@@ -764,7 +764,7 @@
           return c.category === context && !shownNames[c.name];
         });
         if (contextItems.length > 0) {
-          visibleCommands.push({ _section: "推荐 \u2014 " + context });
+          visibleCommands.push({ _section: "Suggested（推荐）\u2014 " + context });
           for (var ci = 0; ci < contextItems.length; ci++) {
             visibleCommands.push(contextItems[ci]);
             shownNames[contextItems[ci].name] = true;
@@ -780,7 +780,7 @@
         return a.name.localeCompare(b.name);
       });
       if (remaining.length > 0) {
-        visibleCommands.push({ _section: "所有命令" });
+        visibleCommands.push({ _section: "All Commands（所有命令）" });
         for (var ai = 0; ai < remaining.length; ai++) {
           visibleCommands.push(remaining[ai]);
         }
@@ -1007,7 +1007,7 @@
         e.preventDefault();
         expanded.classList.remove("expanded");
         var expandBtn = expanded.querySelector(".expand-btn");
-        if (expandBtn) expandBtn.textContent = "展开";
+        if (expandBtn) expandBtn.textContent = "Expand（展开）";
         window.pauseRefresh = false;
         return;
       }
@@ -1216,7 +1216,7 @@
           // Update count
           if (count) {
             var unread = data.unread_count || 0;
-            count.textContent = unread > 0 ? unread + " 未读" : data.total;
+            count.textContent = unread > 0 ? unread + " unread（未读）" : data.total;
             if (unread > 0) count.classList.add("has-unread");
             else count.classList.remove("has-unread");
           }
@@ -1227,7 +1227,7 @@
         }
       })
       .catch(function (err) {
-        loading.textContent = "邮件加载失败";
+        loading.textContent = "Mail loading failed（邮件加载失败）";
         console.error("Mail load error:", err);
       });
   }
@@ -1240,18 +1240,18 @@
 
     // Format: "1月26日 15:45" or "1月26日 2025年 15:45" if different year
     var months = [
-      "1月",
-      "2月",
-      "3月",
-      "4月",
-      "5月",
-      "6月",
-      "7月",
-      "8月",
-      "9月",
-      "10月",
-      "11月",
-      "12月",
+      "Jan（1月）",
+      "Feb（2月）",
+      "Mar（3月）",
+      "Apr（4月）",
+      "May（5月）",
+      "Jun（6月）",
+      "Jul（7月）",
+      "Aug（8月）",
+      "Sep（9月）",
+      "Oct（10月）",
+      "Nov（11月）",
+      "Dec（12月）",
     ];
     var month = months[d.getMonth()];
     var day = d.getDate();
@@ -1266,13 +1266,13 @@
 
     // Add relative time in parentheses for recent messages
     var relative = "";
-    if (diff < 60000) relative = " (刚刚)";
+    if (diff < 60000) relative = " (just now（刚刚）)";
     else if (diff < 3600000)
-      relative = " (" + Math.floor(diff / 60000) + "分钟前)";
+      relative = " (" + Math.floor(diff / 60000) + "min ago（分钟前）)";
     else if (diff < 86400000)
-      relative = " (" + Math.floor(diff / 3600000) + "小时前)";
+      relative = " (" + Math.floor(diff / 3600000) + "hr ago（小时前）)";
     else if (diff < 604800000)
-      relative = " (" + Math.floor(diff / 86400000) + "天前)";
+      relative = " (" + Math.floor(diff / 86400000) + "days ago（天前）)";
 
     return dateStr + relative;
   }
@@ -1323,11 +1323,11 @@
 
             var sessionBadge = "";
             if (member.session === "attached") {
-              sessionBadge = '<span class="badge badge-green">已连接</span>';
+              sessionBadge = '<span class="badge badge-green">Connected（已连接）</span>';
             } else if (member.session === "detached") {
-              sessionBadge = '<span class="badge badge-muted">已断开</span>';
+              sessionBadge = '<span class="badge badge-muted">Disconnected（已断开）</span>';
             } else {
-              sessionBadge = '<span class="badge badge-muted">无</span>';
+              sessionBadge = '<span class="badge badge-muted">None（无）</span>';
             }
 
             // Build the attach command based on the crew member's role
@@ -1367,7 +1367,7 @@
               "</td>" +
               '<td><button class="attach-btn" data-cmd="' +
               escapeHtml(attachCmd) +
-              '" title="复制连接命令">连接</button></td>';
+              '" title="Copy attach command（复制连接命令）">Attach（连接）</button></td>';
             tbody.appendChild(tr);
           });
 
@@ -1379,7 +1379,7 @@
         }
       })
       .catch(function (err) {
-        loading.textContent = "Crew 数据加载失败";
+        loading.textContent = "Crew data loading failed（Crew 数据加载失败）";
         console.error("Crew load error:", err);
       });
   }
@@ -1412,15 +1412,15 @@
         if (newState === "finished") {
           showToast(
             "success",
-            "Crew 已完成",
-            member.name + " 已完成工作！",
+            "Crew Done（Crew 已完成）",
+            member.name + " finished work!（已完成工作）",
           );
           playNotificationSound();
         } else if (newState === "questions") {
           showToast(
             "info",
-            "需要关注",
-            member.name + " 有问题需要您处理",
+            "Needs Attention（需要关注）",
+            member.name + " has questions（有问题需要您处理）",
           );
           playNotificationSound();
         }
@@ -1478,11 +1478,11 @@
     navigator.clipboard
       .writeText(cmd)
       .then(function () {
-        showToast("success", "已复制", cmd);
+        showToast("success", "Copied（已复制）", cmd);
       })
       .catch(function () {
         // Fallback for older browsers
-        showToast("info", "请在终端中执行", cmd);
+        showToast("info", "Run in terminal（请在终端中执行）", cmd);
       });
   });
 
@@ -1494,7 +1494,7 @@
     var beadId = btn.getAttribute("data-hook-id");
     if (!beadId) return;
 
-    if (!confirm("确认卸载 Hook " + beadId + "？")) return;
+    if (!confirm("Confirm detach Hook（确认卸载 Hook）" + beadId + "?")) return;
 
     btn.disabled = true;
     btn.textContent = "...";
@@ -1512,24 +1512,25 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已卸载", beadId + " 已从 Hook 卸载");
+          showToast("success", "Detached（已卸载）", beadId + " detached from Hook（已从 Hook 卸载）");
           // Refresh the page to update the hooks panel
           if (typeof htmx !== "undefined") {
             htmx.trigger(document.body, "htmx:load");
           }
         } else {
-          showToast("error", "失败", data.error || "卸载 Hook 失败");
+          showToast("error", "Failed（失败）", data.error || "Hook detach failed（卸载 Hook 失败）");
           btn.disabled = false;
-          btn.textContent = "卸载";
+          btn.textContent = "Detach（卸载）";
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
         btn.disabled = false;
-        btn.textContent = "卸载";
+        btn.textContent = "Detach（卸载）";
       });
   }
   window.detachHook = detachHook;
+
 
   function openHookAttachForm() {
     var form = document.getElementById("hook-attach-form");
@@ -1559,7 +1560,7 @@
     var beadId = input ? input.value.trim() : "";
 
     if (!beadId) {
-      showToast("error", "缺少字段", "请输入 Bead ID");
+      showToast("error", "Missing fields（缺少字段）", "Please enter Bead ID（请输入 Bead ID）");
       return;
     }
 
@@ -1582,33 +1583,33 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已挂载", beadId + " 已挂载到 Hook");
+          showToast("success", "Mounted（已挂载）", beadId + " mounted to Hook（已挂载到 Hook）");
           closeHookAttachForm();
           if (typeof htmx !== "undefined") {
             htmx.trigger(document.body, "htmx:load");
           }
         } else {
-          showToast("error", "失败", data.error || "挂载 Hook 失败");
+          showToast("error", "Failed（失败）", data.error || "Hook mount failed（挂载 Hook 失败）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       })
       .finally(function () {
         if (submitBtn) {
           submitBtn.disabled = false;
-          submitBtn.textContent = "挂载";
+          submitBtn.textContent = "Mount（挂载）";
         }
       });
   }
   window.submitHookAttach = submitHookAttach;
 
   function clearAllHooks() {
-    if (!confirm("确认清除全部 Hook？这将卸载所有已挂载的工作。")) return;
+    if (!confirm("Confirm clear all hooks? This will detach all mounted work.（确认清除全部 Hook？这将卸载所有已挂载的工作。）")) return;
 
     var rows = document.querySelectorAll(".hook-detach-btn");
     if (rows.length === 0) {
-      showToast("info", "无内容", "没有可清除的 Hook");
+      showToast("info", "Empty（无内容）", "No hooks to clear（没有可清除的 Hook）");
       return;
     }
 
@@ -1648,11 +1649,11 @@
             if (errors > 0) {
               showToast(
                 "error",
-                "部分完成",
-                completed + " 个已卸载，" + errors + " 个失败",
+                "Partially done（部分完成）",
+                completed + " detached（个已卸载）, " + errors + " failed（个失败）",
               );
             } else {
-              showToast("success", "已清除", completed + " 个 Hook 已清除");
+              showToast("success", "Cleared（已清除）", completed + " hooks cleared（个 Hook 已清除）");
             }
             if (typeof htmx !== "undefined") {
               htmx.trigger(document.body, "htmx:load");
@@ -1715,13 +1716,13 @@
     var submitBtn = document.getElementById("issue-submit-btn");
 
     if (!title) {
-      showToast("error", "缺少字段", "标题不能为空");
+      showToast("error", "Missing fields（缺少字段）", "Title cannot be empty（标题不能为空）");
       return;
     }
 
     // Disable button while submitting
     submitBtn.disabled = true;
-    submitBtn.textContent = "创建中...";
+    submitBtn.textContent = "Creating...（创建中）";
 
     var payload = {
       title: title,
@@ -1743,8 +1744,8 @@
         if (data.success) {
           showToast(
             "success",
-            "已创建",
-            "Issue " + (data.id || "") + " 已创建",
+            "Created（已创建）",
+            "Issue " + (data.id || "") + " created（已创建）",
           );
           closeIssueModal();
           // Trigger a page refresh to show the new issue
@@ -1752,15 +1753,15 @@
             htmx.trigger(document.body, "htmx:load");
           }
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       })
       .finally(function () {
         submitBtn.disabled = false;
-        submitBtn.textContent = "创建 Issue";
+        submitBtn.textContent = "Create Issue（创建 Issue）";
       });
   }
   window.submitIssue = submitIssue;
@@ -1891,7 +1892,7 @@
         }
       })
       .catch(function (err) {
-        loading.textContent = "就绪工作加载失败";
+        loading.textContent = "Ready work loading failed（就绪工作加载失败）";
         console.error("Ready work load error:", err);
       });
   }
@@ -1959,7 +1960,7 @@
           document
             .getElementById("convoy-issues-empty")
             .querySelector("p").textContent =
-            data.error || "Convoy 加载失败";
+            data.error || "Convoy loading failed（Convoy 加载失败）";
           return;
         }
 
@@ -1981,21 +1982,21 @@
             statusLower === "complete" ||
             statusLower === "done"
           ) {
-            statusBadge = '<span class="badge badge-green">完成</span>';
+            statusBadge = '<span class="badge badge-green">Done（完成）</span>';
           } else if (
             statusLower === "in_progress" ||
             statusLower === "in progress" ||
             statusLower === "working"
           ) {
-            statusBadge = '<span class="badge badge-yellow">进行中</span>';
+            statusBadge = '<span class="badge badge-yellow">In Progress（进行中）</span>';
           } else if (statusLower === "open" || statusLower === "ready") {
-            statusBadge = '<span class="badge badge-blue">待处理</span>';
+            statusBadge = '<span class="badge badge-blue">Pending（待处理）</span>';
           } else if (statusLower === "blocked") {
-            statusBadge = '<span class="badge badge-red">阻塞</span>';
+            statusBadge = '<span class="badge badge-red">Blocked（阻塞）</span>';
           } else {
             statusBadge =
               '<span class="badge badge-muted">' +
-              escapeHtml(issue.status || "未知") +
+              escapeHtml(issue.status || "Unknown（未知）") +
               "</span>";
           }
 
@@ -2014,7 +2015,7 @@
               ? '<span class="badge badge-blue">' +
                 escapeHtml(issue.assignee) +
                 "</span>"
-              : '<span class="badge badge-muted">未分配</span>') +
+              : '<span class="badge badge-muted">Unassigned（未分配）</span>') +
             "</td>" +
             "<td>" +
             escapeHtml(issue.progress || "") +
@@ -2028,7 +2029,7 @@
         document.getElementById("convoy-issues-empty").style.display = "block";
         document
           .getElementById("convoy-issues-empty")
-          .querySelector("p").textContent = "错误：" + err.message;
+          .querySelector("p").textContent = "Error（错误）: " + err.message;
       });
   }
 
@@ -2171,13 +2172,13 @@
         .value.trim();
 
       if (!name) {
-        showToast("error", "缺少字段", "Convoy 名称不能为空");
+        showToast("error", "Missing fields（缺少字段）", "Convoy name cannot be empty（Convoy 名称不能为空）");
         return;
       }
 
       var btn = document.getElementById("convoy-create-submit-btn");
       btn.disabled = true;
-      btn.textContent = "创建中...";
+      btn.textContent = "Creating...（创建中）";
 
       // Build command: convoy create <name> [issue1 issue2 ...]
       var cmd = "convoy create " + name;
@@ -2195,21 +2196,21 @@
         })
         .then(function (data) {
           if (data.success) {
-            showToast("success", "已创建", 'Convoy "' + name + '" 已创建');
+            showToast("success", "Created（已创建）", 'Convoy "' + name + '" created（已创建）');
             cancelConvoyCreate();
             if (data.output && data.output.trim()) {
               showOutput(cmd, data.output);
             }
           } else {
-            showToast("error", "失败", data.error || "未知错误");
+            showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
           }
         })
         .catch(function (err) {
-          showToast("error", "错误", err.message);
+          showToast("error", "Error（错误）", err.message);
         })
         .finally(function () {
           btn.disabled = false;
-          btn.textContent = "创建 Convoy";
+          btn.textContent = "Create Convoy（创建 Convoy）";
         });
     });
 
@@ -2255,13 +2256,13 @@
       .getElementById("convoy-add-issue-input")
       .value.trim();
     if (!issueId || !currentConvoyId) {
-      showToast("error", "缺少字段", "Issue ID 不能为空");
+      showToast("error", "Missing fields（缺少字段）", "Issue ID cannot be empty（Issue ID 不能为空）");
       return;
     }
 
     var btn = document.getElementById("convoy-add-issue-submit");
     btn.disabled = true;
-    btn.textContent = "添加中...";
+    btn.textContent = "Adding...（添加中）";
 
     var cmd = "convoy add " + currentConvoyId + " " + issueId;
 
@@ -2277,23 +2278,23 @@
         if (data.success) {
           showToast(
             "success",
-            "已添加",
-            "Issue " + issueId + " 已添加到 Convoy",
+            "Added（已添加）",
+            "Issue " + issueId + " added to Convoy（已添加到 Convoy）",
           );
           document.getElementById("convoy-add-issue-form").style.display =
             "none";
           // Refresh the convoy detail view
           openConvoyDetail(currentConvoyId);
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       })
       .finally(function () {
         btn.disabled = false;
-        btn.textContent = "添加";
+        btn.textContent = "Add（添加）";
       });
   }
 
@@ -2355,7 +2356,7 @@
     window.pauseRefresh = true;
 
     // Show loading state
-    document.getElementById("mail-detail-subject").textContent = "加载中...";
+    document.getElementById("mail-detail-subject").textContent = "Loading...（加载中）";
     document.getElementById("mail-detail-from").textContent = from || "";
     document.getElementById("mail-detail-body").textContent = "";
     document.getElementById("mail-detail-time").textContent = "";
@@ -2373,17 +2374,17 @@
       })
       .then(function (msg) {
         document.getElementById("mail-detail-subject").textContent =
-          msg.subject || "（无主题）";
+          msg.subject || "(No subject（无主题）)";
         document.getElementById("mail-detail-from").textContent =
           msg.from || from;
         document.getElementById("mail-detail-body").textContent =
-          msg.body || "（无内容）";
+          msg.body || "(No body（无内容）)";
         document.getElementById("mail-detail-time").textContent =
           msg.timestamp || "";
       })
       .catch(function (err) {
         document.getElementById("mail-detail-body").textContent =
-          "消息加载失败：" + err.message;
+          "Message loading failed（消息加载失败）: " + err.message;
       });
   }
 
@@ -2418,7 +2419,7 @@
         ? subject
         : "Re: " + subject;
 
-      document.getElementById("mail-compose-title").textContent = "回复";
+      document.getElementById("mail-compose-title").textContent = "Reply（回复）";
       document.getElementById("compose-subject").value = replySubject;
       document.getElementById("compose-reply-to").value =
         currentMessageId || "";
@@ -2439,7 +2440,7 @@
       // Pause HTMX refresh while composing
       window.pauseRefresh = true;
 
-      document.getElementById("mail-compose-title").textContent = "新消息";
+      document.getElementById("mail-compose-title").textContent = "New Message（新消息）";
       document.getElementById("compose-subject").value = "";
       document.getElementById("compose-body").value = "";
       document.getElementById("compose-reply-to").value = "";
@@ -2491,12 +2492,12 @@
       var replyTo = document.getElementById("compose-reply-to").value;
 
       if (!to || !subject) {
-        showToast("error", "缺少字段", "请填写收件人和主题");
+        showToast("error", "Missing fields（缺少字段）", "Please fill in recipient and subject（请填写收件人和主题）");
         return;
       }
 
       var btn = document.getElementById("mail-send-btn");
-      btn.textContent = "发送中...";
+      btn.textContent = "Sending...（发送中）";
       btn.disabled = true;
 
       fetch("/api/mail/send", {
@@ -2514,7 +2515,7 @@
         })
         .then(function (data) {
           if (data.success) {
-            showToast("success", "已发送", "消息已发送给 " + to);
+            showToast("success", "Sent（已发送）", "Message sent to（消息已发送给）" + to);
             mailCompose.style.display = "none";
             mailList.style.display = "block";
             currentMessageId = null;
@@ -2525,16 +2526,16 @@
           } else {
             showToast(
               "error",
-              "失败",
-              data.error || "消息发送失败",
+              "Failed（失败）",
+              data.error || "Message send failed（消息发送失败）",
             );
           }
         })
         .catch(function (err) {
-          showToast("error", "错误", err.message);
+          showToast("error", "Error（错误）", err.message);
         })
         .finally(function () {
-          btn.textContent = "发送";
+          btn.textContent = "Send（发送）";
           btn.disabled = false;
         });
     });
@@ -2545,7 +2546,7 @@
     var select = document.getElementById("compose-to");
 
     // Show loading state
-    select.innerHTML = '<option value="">加载收件人中...</option>';
+    select.innerHTML = '<option value="">Loading recipients...（加载收件人中）</option>';
     select.disabled = true;
 
     // If we have a selected value for reply, add it immediately so it's available
@@ -2553,7 +2554,7 @@
       var cleanValue = selectedValue.replace(/\/$/, "").trim();
       var opt = document.createElement("option");
       opt.value = cleanValue;
-      opt.textContent = cleanValue + "（回复对象）";
+      opt.textContent = cleanValue + " (reply to（回复对象）)";
       opt.selected = true;
       select.appendChild(opt);
       select.disabled = false;
@@ -2566,14 +2567,14 @@
       })
       .then(function (data) {
         // Clear loading state, rebuild options
-        select.innerHTML = '<option value="">选择收件人...</option>';
+        select.innerHTML = '<option value="">Select recipient...（选择收件人）</option>';
 
         // Re-add reply-to if present
         if (selectedValue) {
           var cleanVal = selectedValue.replace(/\/$/, "").trim();
           var replyOpt = document.createElement("option");
           replyOpt.value = cleanVal;
-          replyOpt.textContent = cleanVal + "（回复对象）";
+          replyOpt.textContent = cleanVal + " (reply to（回复对象）)";
           replyOpt.selected = true;
           select.appendChild(replyOpt);
         }
@@ -2594,7 +2595,7 @@
 
           var opt = document.createElement("option");
           opt.value = name;
-          opt.textContent = name + (running ? "（运行中）" : "（已停止）");
+          opt.textContent = name + (running ? " (running（运行中）)" : " (stopped（已停止）)");
           if (!running) opt.disabled = true;
           select.appendChild(opt);
         });
@@ -2604,7 +2605,7 @@
       .catch(function (err) {
         console.error("Failed to load agents for To dropdown:", err);
         select.innerHTML =
-          '<option value="">收件人加载失败</option>';
+          '<option value="">Recipients loading failed（收件人加载失败）</option>';
         select.disabled = false;
       });
   }
@@ -2647,7 +2648,7 @@
     // Show loading state
     document.getElementById("issue-detail-id").textContent = issueId;
     document.getElementById("issue-detail-title-text").textContent =
-      "加载中...";
+      "Loading...（加载中）";
     document.getElementById("issue-detail-description").textContent = "";
     document.getElementById("issue-detail-priority").textContent = "";
     document.getElementById("issue-detail-status").textContent = "";
@@ -2673,7 +2674,7 @@
       .then(function (data) {
         if (data.error) {
           document.getElementById("issue-detail-title-text").textContent =
-            "Issue 加载失败";
+            "Issue loading failed（Issue 加载失败）";
           document.getElementById("issue-detail-description").textContent =
             data.error;
           return;
@@ -2682,9 +2683,9 @@
         document.getElementById("issue-detail-id").textContent =
           data.id || issueId;
         document.getElementById("issue-detail-title-text").textContent =
-          data.title || "（无标题）";
+          data.title || "(No title（无标题）)";
         document.getElementById("issue-detail-description").textContent =
-          data.description || data.raw_output || "（无描述）";
+          data.description || data.raw_output || "(No description（无描述）)";
 
         // Priority badge
         var priorityEl = document.getElementById("issue-detail-priority");
@@ -2710,15 +2711,15 @@
         // Meta info
         if (data.type) {
           document.getElementById("issue-detail-type").textContent =
-            "类型：" + data.type;
+            "Type（类型）: " + data.type;
         }
         if (data.owner) {
           document.getElementById("issue-detail-owner").textContent =
-            "负责人：" + data.owner;
+            "Assignee（负责人）: " + data.owner;
         }
         if (data.created) {
           document.getElementById("issue-detail-created").textContent =
-            "创建时间：" + data.created;
+            "Created（创建时间）: " + data.created;
         }
 
         // Render action buttons
@@ -2762,9 +2763,9 @@
       })
       .catch(function (err) {
         document.getElementById("issue-detail-title-text").textContent =
-          "错误";
+          "Error（错误）";
         document.getElementById("issue-detail-description").textContent =
-          "Issue 加载失败：" + err.message;
+          "Issue loading failed（Issue 加载失败）: " + err.message;
       });
   }
 
@@ -2803,17 +2804,17 @@
       html +=
         '<button class="issue-action-btn reopen" onclick="reopenIssue(\'' +
         escapeHtml(issueId) +
-        "')\">↺ 重新打开</button>";
+        "')\">↺ Reopen（重新打开）</button>";
     } else {
       html +=
         '<button class="issue-action-btn close" onclick="closeIssue(\'' +
         escapeHtml(issueId) +
-        "')\">关闭</button>";
+        "')\">Close（关闭）</button>";
     }
 
     // Priority dropdown
     html += '<div class="issue-action-group">';
-    html += '<label class="issue-action-label">优先级</label>';
+    html += '<label class="issue-action-label">Priority（优先级）</label>';
     html +=
       '<select class="issue-action-select" id="issue-action-priority" onchange="updateIssuePriority(\'' +
       escapeHtml(issueId) +
@@ -2822,12 +2823,12 @@
       var sel = p === priNum ? " selected" : "";
       var pLabel =
         p === 1
-          ? "P1 - 紧急"
+          ? "P1 - Urgent（紧急）"
           : p === 2
-            ? "P2 - 高"
+            ? "P2 - High（高）"
             : p === 3
-              ? "P3 - 中"
-              : "P4 - 低";
+              ? "P3 - Medium（中）"
+              : "P4 - Low（低）";
       html += '<option value="' + p + '"' + sel + ">" + pLabel + "</option>";
     }
     html += "</select>";
@@ -2835,13 +2836,13 @@
 
     // Assignee dropdown
     html += '<div class="issue-action-group">';
-    html += '<label class="issue-action-label">分配给</label>';
+    html += '<label class="issue-action-label">Assign to（分配给）</label>';
     html +=
       '<select class="issue-action-select" id="issue-action-assignee" onchange="assignIssue(\'' +
       escapeHtml(issueId) +
       "', this.value)\">";
-    html += '<option value="">未分配</option>';
-    html += '<option value="" disabled>加载智能体中...</option>';
+    html += '<option value="">Unassigned（未分配）</option>';
+    html += '<option value="" disabled>Loading agents...（加载智能体中）</option>';
     html += "</select>";
     html += "</div>";
 
@@ -2863,7 +2864,7 @@
       })
       .then(function (data) {
         // Rebuild dropdown
-        var html = '<option value="">未分配</option>';
+        var html = '<option value="">Unassigned（未分配）</option>';
         var agents = data.agents || [];
         var polecats = data.polecats || [];
 
@@ -2901,15 +2902,15 @@
         select.innerHTML = html;
       })
       .catch(function () {
-        select.innerHTML = '<option value="">未分配</option>';
+        select.innerHTML = '<option value="">Unassigned（未分配）</option>';
       });
   }
 
   // Close an issue
   function closeIssue(issueId) {
-    if (!confirm("确认关闭 Issue " + issueId + "？")) return;
+    if (!confirm("Confirm close Issue（确认关闭 Issue）" + issueId + "?")) return;
 
-    showToast("info", "关闭中...", issueId);
+    showToast("info", "Closing...（关闭中）", issueId);
 
     fetch("/api/issues/close", {
       method: "POST",
@@ -2921,22 +2922,22 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已关闭", issueId + " 已关闭");
+          showToast("success", "Closed（已关闭）", issueId + " closed（已关闭）");
           // Re-fetch to update the detail view
           openIssueDetail(issueId);
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       });
   }
   window.closeIssue = closeIssue;
 
   // Reopen an issue
   function reopenIssue(issueId) {
-    showToast("info", "重新打开中...", issueId);
+    showToast("info", "Reopening...（重新打开中）", issueId);
 
     fetch("/api/issues/update", {
       method: "POST",
@@ -2948,14 +2949,14 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已重新打开", issueId + " 已重新打开");
+          showToast("success", "Reopened（已重新打开）", issueId + " reopened（已重新打开）");
           openIssueDetail(issueId);
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       });
   }
   window.reopenIssue = reopenIssue;
@@ -2965,7 +2966,7 @@
     var priNum = parseInt(priority, 10);
     if (priNum < 1 || priNum > 4) return;
 
-    showToast("info", "设置优先级中...", "设置优先级为 P" + priNum);
+    showToast("info", "Setting priority...（设置优先级中）", "Setting priority to P（设置优先级为 P）" + priNum);
 
     fetch("/api/issues/update", {
       method: "POST",
@@ -2977,14 +2978,14 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已更新", "优先级已设置为 P" + priNum);
+          showToast("success", "Updated（已更新）", "Priority set to P（优先级已设置为 P）" + priNum);
           openIssueDetail(issueId);
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       });
   }
   window.updateIssuePriority = updateIssuePriority;
@@ -2993,7 +2994,7 @@
   function assignIssue(issueId, assignee) {
     if (!assignee) return; // Unassigned selected, no-op for now
 
-    showToast("info", "分配中...", "正在分配给 " + assignee);
+    showToast("info", "Assigning...（分配中）", "Assigning to（正在分配给）" + assignee);
 
     fetch("/api/issues/update", {
       method: "POST",
@@ -3005,14 +3006,14 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已分配", "已分配给 " + assignee);
+          showToast("success", "Assigned（已分配）", "Assigned to（已分配给）" + assignee);
           openIssueDetail(issueId);
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message);
+        showToast("error", "Error（错误）", err.message);
       });
   }
   window.assignIssue = assignIssue;
@@ -3043,7 +3044,7 @@
     window.pauseRefresh = true;
 
     // Show loading state
-    document.getElementById("pr-detail-number").textContent = "加载中...";
+    document.getElementById("pr-detail-number").textContent = "Loading...（加载中）";
     document.getElementById("pr-detail-title-text").textContent = "";
     document.getElementById("pr-detail-body").textContent = "";
     document.getElementById("pr-detail-state").textContent = "";
@@ -3071,7 +3072,7 @@
       .then(function (data) {
         if (data.error) {
           document.getElementById("pr-detail-title-text").textContent =
-            "PR 加载失败";
+            "PR loading failed（PR 加载失败）";
           document.getElementById("pr-detail-body").textContent = data.error;
           return;
         }
@@ -3079,9 +3080,9 @@
         document.getElementById("pr-detail-number").textContent =
           "#" + data.number;
         document.getElementById("pr-detail-title-text").textContent =
-          data.title || "（无标题）";
+          data.title || "(No title（无标题）)";
         document.getElementById("pr-detail-body").textContent =
-          data.body || "（无描述）";
+          data.body || "(No description（无描述）)";
 
         // State badge
         var stateEl = document.getElementById("pr-detail-state");
@@ -3093,7 +3094,7 @@
         // Meta info
         if (data.author) {
           document.getElementById("pr-detail-author").textContent =
-            "作者：" + data.author;
+            "Author（作者）: " + data.author;
         }
         if (data.base_ref && data.head_ref) {
           document.getElementById("pr-detail-branches").textContent =
@@ -3102,7 +3103,7 @@
         if (data.created_at) {
           var created = new Date(data.created_at);
           document.getElementById("pr-detail-created").textContent =
-            "创建于 " + created.toLocaleDateString();
+            "Created（创建于）" + created.toLocaleDateString();
         }
 
         // Stats
@@ -3116,7 +3117,7 @@
         }
         if (data.changed_files !== undefined) {
           document.getElementById("pr-detail-files").textContent =
-            data.changed_files + " 个文件";
+            data.changed_files + " files（个文件）";
         }
 
         // Labels
@@ -3160,9 +3161,9 @@
         }
       })
       .catch(function (err) {
-        document.getElementById("pr-detail-title-text").textContent = "错误";
+        document.getElementById("pr-detail-title-text").textContent = "Error（错误）";
         document.getElementById("pr-detail-body").textContent =
-          "PR 加载失败：" + err.message;
+          "PR loading failed（PR 加载失败）: " + err.message;
       });
   }
 
@@ -3199,7 +3200,7 @@
     var dropdown = document.createElement("div");
     dropdown.className = "sling-dropdown";
     dropdown.innerHTML =
-      '<div class="sling-dropdown-loading">加载 Rig 中...</div>';
+      '<div class="sling-dropdown-loading">Loading Rigs...（加载 Rig 中）</div>';
 
     // Position dropdown below the button
     var rect = btn.getBoundingClientRect();
@@ -3219,13 +3220,13 @@
         var rigs = data.rigs || [];
         if (rigs.length === 0) {
           dropdown.innerHTML =
-            '<div class="sling-dropdown-empty">暂无可用 Rig</div>';
+            '<div class="sling-dropdown-empty">No available Rig（暂无可用 Rig）</div>';
           return;
         }
         var html =
-          '<div class="sling-dropdown-header">分配 ' +
+          '<div class="sling-dropdown-header">Assign（分配）' +
           escapeHtml(beadId) +
-          " 到：</div>";
+          " to（到）:</div>";
         for (var i = 0; i < rigs.length; i++) {
           html +=
             '<button class="sling-dropdown-item" data-rig="' +
@@ -3247,13 +3248,13 @@
       })
       .catch(function () {
         dropdown.innerHTML =
-          '<div class="sling-dropdown-empty">Rig 加载失败</div>';
+          '<div class="sling-dropdown-empty">Rig loading failed（Rig 加载失败）</div>';
       });
   }
 
   function executeSling(beadId, rig) {
     var cmd = "sling " + beadId + " " + rig;
-    showToast("info", "分配中...", beadId + " → " + rig);
+    showToast("info", "Assigning...（分配中）", beadId + " → " + rig);
 
     fetch("/api/run", {
       method: "POST",
@@ -3265,19 +3266,19 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "已分配", beadId + " → " + rig);
+          showToast("success", "Assigned（已分配）", beadId + " → " + rig);
           if (data.output && data.output.trim()) {
             showOutput(cmd, data.output);
           }
         } else {
-          showToast("error", "分配失败", data.error || "未知错误");
+          showToast("error", "Assign failed（分配失败）", data.error || "Unknown error（未知错误）");
           if (data.output) {
             showOutput(cmd, data.output);
           }
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message || "请求失败");
+        showToast("error", "Error（错误）", err.message || "Request failed（请求失败）");
       });
   }
 
@@ -3318,13 +3319,13 @@
     // Ack or Resolve - run directly
     var cmdName = "escalate " + action + " " + id;
     btn.disabled = true;
-    btn.textContent = action === "ack" ? "确认中..." : "解决中...";
+    btn.textContent = action === "ack" ? "Acking...（确认中）" : "Resolving...（解决中）";
 
     runEscalationAction(cmdName, btn, action);
   });
 
   function runEscalationAction(cmdName, btn, action) {
-    showToast("info", "执行中...", "gt " + cmdName);
+    showToast("info", "Running...（执行中）", "gt " + cmdName);
 
     fetch("/api/run", {
       method: "POST",
@@ -3336,7 +3337,7 @@
       })
       .then(function (data) {
         if (data.success) {
-          showToast("success", "成功", "gt " + cmdName);
+          showToast("success", "Success（成功）", "gt " + cmdName);
           // Remove ack button or fade row on resolve
           var row = btn.closest(".escalation-row");
           if (action === "resolve" && row) {
@@ -3347,15 +3348,15 @@
             btn.outerHTML = '<span class="badge badge-cyan">ACK</span>';
           }
         } else {
-          showToast("error", "失败", data.error || "未知错误");
+          showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
           btn.disabled = false;
-          btn.textContent = action === "ack" ? "确认" : "解决";
+          btn.textContent = action === "ack" ? "Ack（确认）" : "Resolve（解决）";
         }
       })
       .catch(function (err) {
-        showToast("error", "错误", err.message || "请求失败");
+        showToast("error", "Error（错误）", err.message || "Request failed（请求失败）");
         btn.disabled = false;
-        btn.textContent = action === "ack" ? "确认" : "解决";
+        btn.textContent = action === "ack" ? "Ack（确认）" : "Resolve（解决）";
       });
   }
 
@@ -3370,7 +3371,7 @@
     var picker = document.createElement("div");
     picker.className = "reassign-picker";
     picker.innerHTML =
-      '<select class="reassign-select"><option value="">加载中...</option></select>' +
+      '<select class="reassign-select"><option value="">Loading...（加载中）</option></select>' +
       '<button class="esc-btn esc-reassign-confirm">Go</button>' +
       '<button class="esc-btn esc-reassign-cancel">X</button>';
     btn.parentNode.appendChild(picker);
@@ -3386,19 +3387,19 @@
         return r.json();
       })
       .then(function (data) {
-        select.innerHTML = '<option value="">选择智能体...</option>';
+        select.innerHTML = '<option value="">Select agent...（选择智能体）</option>';
         var agents = data.agents || [];
         agents.forEach(function (agent) {
           var name = typeof agent === "string" ? agent : agent.name;
           var running = typeof agent === "object" ? agent.running : true;
           var opt = document.createElement("option");
           opt.value = name;
-          opt.textContent = name + (running ? "" : "（已停止）");
+          opt.textContent = name + (running ? "" : " (stopped（已停止）)");
           select.appendChild(opt);
         });
       })
       .catch(function () {
-        select.innerHTML = '<option value="">加载失败</option>';
+        select.innerHTML = '<option value="">Loading failed（加载失败）</option>';
       });
 
     // Confirm reassign
@@ -3407,7 +3408,7 @@
       .addEventListener("click", function () {
         var agent = select.value;
         if (!agent) {
-          showToast("error", "缺少字段", "请选择要重新分配到的智能体");
+          showToast("error", "Missing fields（缺少字段）", "Please select an agent to reassign（请选择要重新分配到的智能体）");
           return;
         }
         picker.remove();
@@ -3415,9 +3416,9 @@
 
         var cmdName = "escalate reassign " + escalationId + " " + agent;
         btn.disabled = true;
-        btn.textContent = "重新分配中...";
+        btn.textContent = "Reassigning...（重新分配中）";
 
-        showToast("info", "执行中...", "gt " + cmdName);
+        showToast("info", "Running...（执行中）", "gt " + cmdName);
 
         fetch("/api/run", {
           method: "POST",
@@ -3431,8 +3432,8 @@
             if (data.success) {
               showToast(
                 "success",
-                "已重新分配",
-                "升级事件已重新分配给 " + agent,
+                "Reassigned（已重新分配）",
+                "Escalation reassigned to（升级事件已重新分配给）" + agent,
               );
               var row = btn.closest(".escalation-row");
               if (row) {
@@ -3441,15 +3442,15 @@
                 if (fromCell) fromCell.textContent = "→ " + agent;
               }
             } else {
-              showToast("error", "失败", data.error || "未知错误");
+              showToast("error", "Failed（失败）", data.error || "Unknown error（未知错误）");
             }
             btn.disabled = false;
-            btn.textContent = "↻ 重新分配";
+            btn.textContent = "↻ Reassign（重新分配）";
           })
           .catch(function (err) {
-            showToast("error", "错误", err.message || "请求失败");
+            showToast("error", "Error（错误）", err.message || "Request failed（请求失败）");
             btn.disabled = false;
-            btn.textContent = "↻ 重新分配";
+            btn.textContent = "↻ Reassign（重新分配）";
           });
       });
 
@@ -3622,7 +3623,7 @@
     if (emptyState) emptyState.style.display = "none";
 
     nameEl.textContent = sessionName;
-    contentEl.textContent = "加载中...";
+    contentEl.textContent = "Loading...（加载中）";
     statusEl.textContent = "";
     preview.style.display = "block";
 
@@ -3643,10 +3644,10 @@
       })
       .then(function (data) {
         if (data.error) {
-          contentEl.textContent = "错误：" + data.error;
+          contentEl.textContent = "Error（错误）: " + data.error;
           return;
         }
-        contentEl.textContent = data.content || "（空）";
+        contentEl.textContent = data.content || "(Empty（空）)";
         // Auto-scroll to bottom
         contentEl.scrollTop = contentEl.scrollHeight;
         // Show refresh timestamp
@@ -3659,10 +3660,10 @@
           ":" +
           (now.getSeconds() < 10 ? "0" : "") +
           now.getSeconds();
-        statusEl.textContent = "已刷新 " + timeStr;
+        statusEl.textContent = "Refreshed（已刷新）" + timeStr;
       })
       .catch(function (err) {
-        contentEl.textContent = "预览加载失败：" + err.message;
+        contentEl.textContent = "Preview loading failed（预览加载失败）: " + err.message;
       });
   }
 
@@ -3737,7 +3738,7 @@
     var detailCell = document.createElement("td");
     detailCell.colSpan = 4;
     detailCell.innerHTML =
-      '<div class="tracked-issues"><div class="tracked-issues-loading">加载跟踪的 Issue 中...</div></div>';
+      '<div class="tracked-issues"><div class="tracked-issues-loading">Loading tracked issues...（加载跟踪的 Issue 中）</div></div>';
     detailRow.appendChild(detailCell);
     row.parentNode.insertBefore(detailRow, row.nextSibling);
 
@@ -3761,8 +3762,8 @@
       .then(function (data) {
         if (!data.success) {
           detailCell.innerHTML =
-            '<div class="tracked-issues"><div class="tracked-issues-error">加载失败：' +
-            escapeHtml(data.error || "未知错误") +
+            '<div class="tracked-issues"><div class="tracked-issues-error">Loading failed（加载失败）: ' +
+            escapeHtml(data.error || "Unknown error（未知错误）") +
             "</div></div>";
           return;
         }
@@ -3772,12 +3773,12 @@
           renderConvoyIssues(detailCell, parsed);
         } catch (err) {
           detailCell.innerHTML =
-            '<div class="tracked-issues"><div class="tracked-issues-error">响应解析失败</div></div>';
+            '<div class="tracked-issues"><div class="tracked-issues-error">Response parse failed（响应解析失败）</div></div>';
         }
       })
       .catch(function (err) {
         detailCell.innerHTML =
-          '<div class="tracked-issues"><div class="tracked-issues-error">请求失败：' +
+          '<div class="tracked-issues"><div class="tracked-issues-error">Request failed（请求失败）: ' +
           escapeHtml(err.message) +
           "</div></div>";
       });
@@ -3787,14 +3788,14 @@
     var issues = data.tracked || [];
     if (issues.length === 0) {
       cell.innerHTML =
-        '<div class="tracked-issues"><div class="tracked-issues-empty">暂无跟踪的 Issue</div></div>';
+        '<div class="tracked-issues"><div class="tracked-issues-empty">No tracked issues（暂无跟踪的 Issue）</div></div>';
       return;
     }
 
     var html = '<div class="tracked-issues">';
     html += '<table class="tracked-issues-table">';
     html +=
-      "<thead><tr><th>状态</th><th>ID</th><th>标题</th><th>负责人</th><th>进度</th></tr></thead>";
+      "<thead><tr><th>Status（状态）</th><th>ID</th><th>Title（标题）</th><th>Assignee（负责人）</th><th>Progress（进度）</th></tr></thead>";
     html += "<tbody>";
 
     for (var i = 0; i < issues.length; i++) {
@@ -3804,16 +3805,16 @@
       var statusBadge = "";
       switch (issue.status) {
         case "closed":
-          statusBadge = '<span class="badge badge-green">完成</span>';
+          statusBadge = '<span class="badge badge-green">Done（完成）</span>';
           break;
         case "in_progress":
-          statusBadge = '<span class="badge badge-yellow">进行中</span>';
+          statusBadge = '<span class="badge badge-yellow">In Progress（进行中）</span>';
           break;
         case "hooked":
-          statusBadge = '<span class="badge badge-blue">已挂载</span>';
+          statusBadge = '<span class="badge badge-blue">Hooked（已挂载）</span>';
           break;
         default:
-          statusBadge = '<span class="badge badge-muted">待处理</span>';
+          statusBadge = '<span class="badge badge-muted">Pending（待处理）</span>';
       }
 
       // Assignee - extract short name
@@ -3826,7 +3827,7 @@
       // Worker info as progress indicator
       var progress = "";
       if (issue.status === "closed") {
-        progress = '<span class="convoy-progress-done">完成</span>';
+        progress = '<span class="convoy-progress-done">Done（完成）</span>';
       } else if (issue.worker) {
         var workerName = issue.worker.split("/").pop();
         progress =
@@ -3876,7 +3877,7 @@
       '%;"></div></div>';
     html +=
       '<span class="tracked-issues-progress-text">' +
-      "已完成 " +
+      "Completed（已完成）" +
       completed +
       "/" +
       total +

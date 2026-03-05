@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -310,14 +311,14 @@ func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	// Check if mayor/ directory exists (indicates a Gas Town HQ)
+	// Check if mayor/ directory exists (indicates a JuZhi HQ)
 	mayorDir := filepath.Join(path, "mayor")
 	if _, err := os.Stat(mayorDir); os.IsNotExist(err) {
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{
 			Valid:   false,
 			Path:    path,
-			Message: "不是 JoinAI 多智能体编排工厂工作空间（缺少 mayor/ 目录）",
+			Message: "不是聚智JoinAI工作空间（缺少 mayor/ 目录）",
 		})
 		return
 	}
@@ -407,8 +408,14 @@ func NewSetupMux() (http.Handler, error) {
 	setupHandler := NewSetupHandler(csrfToken)
 	apiHandler := NewSetupAPIHandler(csrfToken)
 
+	staticFS, err := fs.Sub(staticFiles, "static")
+	if err != nil {
+		return nil, err
+	}
+
 	mux := http.NewServeMux()
 	mux.Handle("/api/", apiHandler)
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.FS(staticFS))))
 	mux.Handle("/", setupHandler)
 
 	return mux, nil
@@ -420,28 +427,29 @@ const setupHTML = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="dashboard-token" content="<!--CSRF_TOKEN-->">
-    <title>JoinAI 多智能体编排工厂 - 初始设置</title>
+    <title>聚智JoinAI · 初始设置</title>
+    <link rel="icon" href="/static/logo.ico" type="image/x-icon">
     <style>
         :root {
-            --bg-dark: #0d1117;
-            --bg-card: #161b22;
-            --bg-card-hover: #1c2128;
-            --border: #30363d;
-            --text-primary: #e6edf3;
-            --text-secondary: #8b949e;
-            --text-muted: #6e7681;
-            --green: #3fb950;
-            --blue: #58a6ff;
-            --yellow: #d29922;
-            --red: #f85149;
-            --orange: #db6d28;
+            --bg-dark: #EEF6FB;
+            --bg-card: #ffffff;
+            --bg-card-hover: #f0f3fa;
+            --border: #d0d8ef;
+            --text-primary: #374057;
+            --text-secondary: #475067;
+            --text-muted: #646D84;
+            --green: #16a34a;
+            --blue: #4B72EF;
+            --yellow: #ca8a04;
+            --red: #dc2626;
+            --orange: #c05621;
             --font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            font-family: 'PingFang SC', -apple-system, 'Microsoft YaHei', 'Segoe UI', sans-serif;
             background: var(--bg-dark);
             color: var(--text-primary);
             min-height: 100vh;
@@ -551,9 +559,9 @@ const setupHTML = `<!DOCTYPE html>
 
         .btn {
             padding: 10px 20px;
-            border-radius: 6px;
+            border-radius: 20px;
             font-size: 0.9rem;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
             border: 1px solid var(--border);
             transition: all 0.15s ease;
@@ -561,13 +569,14 @@ const setupHTML = `<!DOCTYPE html>
         }
 
         .btn-primary {
-            background: var(--green);
-            color: var(--bg-dark);
-            border-color: var(--green);
+            background: #373B61;
+            color: #ffffff;
+            border-color: #373B61;
         }
 
         .btn-primary:hover {
-            opacity: 0.9;
+            background: #4B72EF;
+            border-color: #4B72EF;
         }
 
         .btn-primary:disabled {
@@ -719,7 +728,7 @@ const setupHTML = `<!DOCTYPE html>
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <h1 style="font-size:2rem;color:#58a6ff;margin:0 0 16px 0;font-weight:600;letter-spacing:0.05em;">JoinAI 多智能体编排工厂</h1>
+            <h1 style="font-size:2rem;color:#373B61;margin:0 0 16px 0;font-weight:700;letter-spacing:0.05em;">聚智JoinAI · 多智能体编排控制中心</h1>
             <p>开始配置您的工作空间</p>
         </div>
 
@@ -733,12 +742,12 @@ const setupHTML = `<!DOCTYPE html>
         <div class="setup-card" id="mode-existing">
             <h2>打开现有工作空间</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
-                输入现有 JoinAI 多智能体编排工厂工作空间的路径。
+                输入现有聚智JoinAI工作空间的路径。
             </p>
             <div class="form-group">
                 <label>工作空间路径</label>
                 <input type="text" id="existing-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">JoinAI 多智能体编排工厂总部目录路径</div>
+                <div class="hint">聚智JoinAI工作空间目录路径</div>
             </div>
             <button class="btn btn-primary" id="check-btn" onclick="checkWorkspace()">检查工作空间</button>
             <div id="workspace-result"></div>
@@ -746,11 +755,11 @@ const setupHTML = `<!DOCTYPE html>
 
         <!-- Create New Workspace Mode -->
         <div class="setup-card hidden" id="mode-create">
-            <h2><span class="step-number" id="step1-num">1</span> 创建工作空间（总部）</h2>
+            <h2><span class="step-number" id="step1-num">1</span> 创建工作空间</h2>
             <div class="form-group">
                 <label>工作空间路径</label>
                 <input type="text" id="install-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">JoinAI 多智能体编排工厂总部的创建位置</div>
+                <div class="hint">聚智JoinAI工作空间的创建位置</div>
             </div>
             <div class="form-group">
                 <label>工作空间名称（可选）</label>

@@ -1,4 +1,4 @@
-// Package web provides HTTP server and templates for the Gas Town dashboard.
+// Package web provides HTTP server and templates for the JuZhi dashboard.
 package web
 
 import (

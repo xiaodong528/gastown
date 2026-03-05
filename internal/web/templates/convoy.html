@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="dashboard-token" content="{{.CSRFToken}}">
-    <title>JoinAI 多智能体编排工厂 - 控制中心</title>
+    <title>聚智JoinAI Swarm· 多智能体编排控制中心</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://unpkg.com/idiomorph@0.3.0/dist/idiomorph-ext.min.js"></script>
     <link rel="stylesheet" href="/static/dashboard.css">
+    <link rel="icon" href="/static/logo.ico" type="image/x-icon">
     <script>
         (function() {
             var s; try { s = localStorage.getItem('gt-theme'); } catch(e) {}
-            if (s === 'light' || (!s && window.matchMedia('(prefers-color-scheme: light)').matches)) {
-                document.documentElement.setAttribute('data-theme', 'light');
+            if (s === 'dark' || (!s && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.setAttribute('data-theme', 'dark');
             }
         })();
     </script>
@@ -20,16 +21,19 @@
 <body>
     <div class="dashboard" id="dashboard-main" hx-get="/" hx-trigger="sse:dashboard-update, every 30s [!window.pauseRefresh && !window.sseConnected]" hx-swap="morph:outerHTML" hx-ext="morph">
         <header>
-            <span class="ascii-title" style="font-size: 1.4rem; letter-spacing: 0.05em;">JoinAI 多智能体编排工厂 · 控制中心</span>
+            <div style="display: flex; align-items: center;">
+                <img src="/static/logo.ico" alt="聚智JoinAI Swarm" style="height: 28px; width: 28px; margin-right: 10px;">
+                <span class="ascii-title">聚智JoinAI Swarm· 多智能体编排控制中心</span>
+            </div>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <button class="theme-toggle-btn" id="theme-toggle-btn" data-testid="theme-toggle-btn" title="Toggle light/dark mode">
                     <span id="theme-icon"></span>
                 </button>
                 <button class="cmd-btn" id="open-palette-btn">
-                    <span>⌘</span> 命令 <kbd>⌘K</kbd>
+                    <span>⌘</span> Commands（命令）<kbd>⌘K</kbd>
                 </button>
                 <span class="refresh-info" id="refresh-info">
-                    <span id="connection-status">连接中...</span>
+                    <span id="connection-status">Connecting...（连接中...）</span>
                     <span class="htmx-indicator">⟳</span>
                 </span>
             </div>
@@ -42,24 +46,24 @@
                 <span class="mayor-title">Mayor（协调器）</span>
                 {{if .Mayor}}
                     {{if .Mayor.IsAttached}}
-                    <span class="badge badge-green">已连接</span>
+                    <span class="badge badge-green">Connected（已连接）</span>
                     {{else}}
-                    <span class="badge badge-muted">已断开</span>
+                    <span class="badge badge-muted">Disconnected（已断开）</span>
                     {{end}}
                 {{else}}
-                <span class="badge badge-muted">未知</span>
+                <span class="badge badge-muted">Unknown（未知）</span>
                 {{end}}
             </div>
             {{if .Mayor}}{{if .Mayor.IsAttached}}
             <div class="mayor-status">
                 <div class="mayor-stat">
-                    <span class="mayor-stat-label">活动</span>
+                    <span class="mayor-stat-label">Activity（活动）</span>
                     <span class="mayor-stat-value {{if .Mayor.IsActive}}active{{else}}idle{{end}}">
                         {{.Mayor.LastActivity}}
                     </span>
                 </div>
                 <div class="mayor-stat">
-                    <span class="mayor-stat-label">运行时长</span>
+                    <span class="mayor-stat-label">Uptime（运行时长）</span>
                     <span class="mayor-stat-value">{{.Mayor.Runtime}}</span>
                 </div>
             </div>
@@ -86,7 +90,7 @@
                 </div>
                 <div class="stat">
                     <span class="stat-value">{{.Summary.IssueCount}}</span>
-                    <span class="stat-label">工作项</span>
+                    <span class="stat-label">Issue（工作项）</span>
                 </div>
                 <div class="stat">
                     <span class="stat-value">{{.Summary.ConvoyCount}}</span>
@@ -94,30 +98,30 @@
                 </div>
                 <div class="stat">
                     <span class="stat-value">{{.Summary.EscalationCount}}</span>
-                    <span class="stat-label">升级事件</span>
+                    <span class="stat-label">Escalation（升级事件）</span>
                 </div>
             </div>
             {{if .Summary.HasAlerts}}
             <div class="summary-alerts">
                 {{if .Summary.StuckPolecats}}
-                <span class="alert-item alert-red">{{.Summary.StuckPolecats}} 卡住</span>
+                <span class="alert-item alert-red">{{.Summary.StuckPolecats}} Stuck（卡住）</span>
                 {{end}}
                 {{if .Summary.StaleHooks}}
-                <span class="alert-item alert-yellow">{{.Summary.StaleHooks}} 过期 Hook</span>
+                <span class="alert-item alert-yellow">{{.Summary.StaleHooks}} Stale（过期）Hook</span>
                 {{end}}
                 {{if .Summary.UnackedEscalations}}
-                <span class="alert-item alert-orange">{{.Summary.UnackedEscalations}} 未确认</span>
+                <span class="alert-item alert-orange">{{.Summary.UnackedEscalations}} Unacked（未确认）</span>
                 {{end}}
                 {{if .Summary.HighPriorityIssues}}
                 <span class="alert-item alert-red">{{.Summary.HighPriorityIssues}} P1/P2</span>
                 {{end}}
                 {{if .Summary.DeadSessions}}
-                <span class="alert-item alert-red">{{.Summary.DeadSessions}} 已终止</span>
+                <span class="alert-item alert-red">{{.Summary.DeadSessions}} Dead（已终止）</span>
                 {{end}}
             </div>
             {{else}}
             <div class="summary-alerts">
-                <span class="alert-item alert-green">一切正常</span>
+                <span class="alert-item alert-green">All Clear（一切正常）</span>
             </div>
             {{end}}
         </div>
@@ -131,9 +135,9 @@
                 <div class="panel-header">
                     <h2>Convoy（任务批次）</h2>
                     <span class="count">{{len .Convoys}}</span>
-                    <button class="new-convoy-btn" id="new-convoy-btn">+ 新建 Convoy</button>
+                    <button class="new-convoy-btn" id="new-convoy-btn">+ New（新建）Convoy</button>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     <!-- Convoy List View -->
@@ -142,10 +146,10 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th>状态</th>
+                                    <th>Status（状态）</th>
                                     <th>Convoy</th>
-                                    <th>进度</th>
-                                    <th>活动</th>
+                                    <th>Progress（进度）</th>
+                                    <th>Activity（活动）</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -154,15 +158,15 @@
                                     <td>
                                         <span class="convoy-toggle">▶</span>
                                         {{if eq .WorkStatus "complete"}}
-                                        <span class="badge badge-green">完成</span>
+                                        <span class="badge badge-green">Done（完成）</span>
                                         {{else if eq .WorkStatus "active"}}
-                                        <span class="badge badge-green">活跃</span>
+                                        <span class="badge badge-green">Active（活跃）</span>
                                         {{else if eq .WorkStatus "stale"}}
-                                        <span class="badge badge-yellow">过期</span>
+                                        <span class="badge badge-yellow">Stale（过期）</span>
                                         {{else if eq .WorkStatus "stuck"}}
-                                        <span class="badge badge-red">卡住</span>
+                                        <span class="badge badge-red">Stuck（卡住）</span>
                                         {{else}}
-                                        <span class="badge badge-muted">等待</span>
+                                        <span class="badge badge-muted">Waiting（等待）</span>
                                         {{end}}
                                     </td>
                                     <td>
@@ -187,14 +191,14 @@
                         </table>
                         {{else}}
                         <div class="empty-state">
-                            <p>暂无活跃 Convoy</p>
+                            <p>No active Convoy（暂无活跃 Convoy）</p>
                         </div>
                         {{end}}
                     </div>
                     <!-- Convoy Detail View (hidden by default) -->
                     <div id="convoy-detail" style="display: none;">
                         <div class="detail-header">
-                            <button id="convoy-back-btn" class="btn-back">← 返回</button>
+                            <button id="convoy-back-btn" class="btn-back">← Back（返回）</button>
                             <span id="convoy-detail-title" class="convoy-detail-title"></span>
                         </div>
                         <div class="convoy-detail-content">
@@ -205,30 +209,30 @@
                             </div>
                             <div class="convoy-detail-section">
                                 <div class="convoy-issues-header">
-                                    <h4>跟踪的 Issue</h4>
-                                    <button class="convoy-add-issue-btn" id="convoy-add-issue-btn">+ 添加 Issue</button>
+                                    <h4>Tracked Issues（跟踪的 Issue）</h4>
+                                    <button class="convoy-add-issue-btn" id="convoy-add-issue-btn">+ Add Issue（添加 Issue）</button>
                                 </div>
                                 <div id="convoy-add-issue-form" class="convoy-add-issue-form" style="display: none;">
-                                    <input type="text" id="convoy-add-issue-input" class="convoy-add-issue-input" placeholder="输入 Issue ID...">
-                                    <button class="btn-primary convoy-add-issue-submit" id="convoy-add-issue-submit">添加</button>
-                                    <button class="btn-secondary convoy-add-issue-cancel" id="convoy-add-issue-cancel">取消</button>
+                                    <input type="text" id="convoy-add-issue-input" class="convoy-add-issue-input" placeholder="Enter Issue ID...">
+                                    <button class="btn-primary convoy-add-issue-submit" id="convoy-add-issue-submit">Add（添加）</button>
+                                    <button class="btn-secondary convoy-add-issue-cancel" id="convoy-add-issue-cancel">Cancel（取消）</button>
                                 </div>
-                                <div id="convoy-issues-loading" class="loading-state">加载中...</div>
+                                <div id="convoy-issues-loading" class="loading-state">Loading...（加载中...）</div>
                                 <table id="convoy-issues-table" style="display: none;">
                                     <thead>
                                         <tr>
-                                            <th>状态</th>
+                                            <th>Status（状态）</th>
                                             <th>ID</th>
-                                            <th>标题</th>
-                                            <th>负责人</th>
-                                            <th>进度</th>
+                                            <th>Title（标题）</th>
+                                            <th>Assignee（负责人）</th>
+                                            <th>Progress（进度）</th>
                                         </tr>
                                     </thead>
                                     <tbody id="convoy-issues-tbody">
                                     </tbody>
                                 </table>
                                 <div id="convoy-issues-empty" class="empty-state" style="display: none;">
-                                    <p>此 Convoy 中暂无 Issue</p>
+                                    <p>No Issues in this Convoy（此 Convoy 中暂无 Issue）</p>
                                 </div>
                             </div>
                         </div>
@@ -236,21 +240,21 @@
                     <!-- New Convoy Form (hidden by default) -->
                     <div id="convoy-create-form" class="convoy-create-form" style="display: none;">
                         <div class="detail-header">
-                            <button id="convoy-create-back-btn" class="btn-back">← 返回</button>
-                            <span class="convoy-detail-title">新建 Convoy</span>
+                            <button id="convoy-create-back-btn" class="btn-back">← Back（返回）</button>
+                            <span class="convoy-detail-title">New Convoy（新建 Convoy）</span>
                         </div>
                         <div class="convoy-create-fields">
                             <div class="command-field">
-                                <label class="command-field-label" for="convoy-create-name">名称</label>
-                                <input type="text" id="convoy-create-name" class="command-field-input" placeholder="输入 Convoy 名称...">
+                                <label class="command-field-label" for="convoy-create-name">Name（名称）</label>
+                                <input type="text" id="convoy-create-name" class="command-field-input" placeholder="Enter Convoy name...">
                             </div>
                             <div class="command-field">
-                                <label class="command-field-label" for="convoy-create-issues">Issue ID（空格分隔）</label>
+                                <label class="command-field-label" for="convoy-create-issues">Issue ID (space-separated)（空格分隔）</label>
                                 <input type="text" id="convoy-create-issues" class="command-field-input" placeholder="e.g. gt-1kp gt-2ab">
                             </div>
                             <div class="form-actions">
-                                <button class="btn-secondary" id="convoy-create-cancel-btn">取消</button>
-                                <button class="btn-primary" id="convoy-create-submit-btn">创建 Convoy</button>
+                                <button class="btn-secondary" id="convoy-create-cancel-btn">Cancel（取消）</button>
+                                <button class="btn-primary" id="convoy-create-submit-btn">Create Convoy（创建 Convoy）</button>
                             </div>
                         </div>
                     </div>
@@ -260,30 +264,30 @@
             <!-- Crew Panel (named, long-lived workers) -->
             <div class="panel" id="crew-panel">
                 <div class="panel-header">
-                    <h2>Crew（团队）</h2>
+                    <h2>Crew（用户工作区）</h2>
                     <span class="count" id="crew-count">0</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
-                    <div class="loading-state" id="crew-loading">加载中...</div>
+                    <div class="loading-state" id="crew-loading">Loading...（加载中...）</div>
                     <table id="crew-table" style="display: none;">
                         <thead>
                             <tr>
-                                <th>名称</th>
+                                <th>Name（名称）</th>
                                 <th>Rig</th>
-                                <th>状态</th>
+                                <th>Status（状态）</th>
                                 <th>Hook</th>
-                                <th>活动</th>
-                                <th>会话</th>
-                                <th>操作</th>
+                                <th>Activity（活动）</th>
+                                <th>Session（会话）</th>
+                                <th>Actions（操作）</th>
                             </tr>
                         </thead>
                         <tbody id="crew-tbody">
                         </tbody>
                     </table>
                     <div class="empty-state" id="crew-empty" style="display: none;">
-                        <p>暂无 Crew 配置</p>
+                        <p>No Crew configured（暂无 Crew 配置）</p>
                     </div>
                 </div>
             </div>
@@ -294,19 +298,19 @@
                     <h2>Polecat（工作智能体）</h2>
                     <span class="count">{{len .Workers}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     {{if .Workers}}
                     <table>
                         <thead>
                             <tr>
-                                <th>工作者</th>
-                                <th>类型</th>
+                                <th>Worker（工作者）</th>
+                                <th>Type（类型）</th>
                                 <th>Rig</th>
-                                <th>当前任务</th>
-                                <th>状态</th>
-                                <th>活动</th>
+                                <th>Current Task（当前任务）</th>
+                                <th>Status（状态）</th>
+                                <th>Activity（活动）</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -325,13 +329,13 @@
                                 </td>
                                 <td>
                                     {{if eq .WorkStatus "working"}}
-                                    <span class="badge badge-green">工作中</span>
+                                    <span class="badge badge-green">Working（工作中）</span>
                                     {{else if eq .WorkStatus "stale"}}
-                                    <span class="badge badge-yellow">过期</span>
+                                    <span class="badge badge-yellow">Stale（过期）</span>
                                     {{else if eq .WorkStatus "stuck"}}
-                                    <span class="badge badge-red">卡住</span>
+                                    <span class="badge badge-red">Stuck（卡住）</span>
                                     {{else}}
-                                    <span class="badge badge-muted">空闲</span>
+                                    <span class="badge badge-muted">Idle（空闲）</span>
                                     {{end}}
                                 </td>
                                 <td class="{{activityClass .LastActivity}}">
@@ -344,7 +348,7 @@
                     </table>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无 Polecat</p>
+                        <p>No Polecat available（暂无 Polecat）</p>
                     </div>
                     {{end}}
                 </div>
@@ -353,20 +357,20 @@
             <!-- Sessions Panel -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2>会话</h2>
+                    <h2>Session（会话）</h2>
                     <span class="count">{{len .Sessions}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     {{if .Sessions}}
                     <table>
                         <thead>
                             <tr>
-                                <th>角色</th>
+                                <th>Role（角色）</th>
                                 <th>Rig</th>
-                                <th>工作者</th>
-                                <th>活动</th>
+                                <th>Worker（工作者）</th>
+                                <th>Activity（活动）</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -384,17 +388,17 @@
                     </table>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无活跃会话</p>
+                        <p>No active sessions（暂无活跃会话）</p>
                     </div>
                     {{end}}
                     <!-- Session terminal preview -->
                     <div id="session-preview" style="display:none;">
                         <div class="session-preview-header">
-                            <button id="session-preview-back" class="mail-back-btn">← 返回</button>
+                            <button id="session-preview-back" class="mail-back-btn">← Back（返回）</button>
                             <span id="session-preview-name" class="session-preview-title"></span>
                             <span id="session-preview-status" class="session-preview-refresh-status"></span>
                         </div>
-                        <pre id="session-preview-content" class="session-preview-content">加载中...</pre>
+                        <pre id="session-preview-content" class="session-preview-content">Loading...（加载中...）</pre>
                     </div>
                 </div>
             </div>
@@ -402,31 +406,31 @@
             <!-- Activity Timeline Panel -->
             <div class="panel" id="activity-panel">
                 <div class="panel-header">
-                    <h2>活动</h2>
+                    <h2>Activity（活动）</h2>
                     <span class="count">{{len .Activity}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 {{if .Activity}}
                 <div class="tl-filters">
                     <div class="tl-filter-group">
-                        <label>类别：</label>
-                        <button class="tl-filter-btn active" data-filter="category" data-value="all">全部</button>
-                        <button class="tl-filter-btn" data-filter="category" data-value="agent">智能体</button>
-                        <button class="tl-filter-btn" data-filter="category" data-value="work">工作</button>
-                        <button class="tl-filter-btn" data-filter="category" data-value="comms">通信</button>
-                        <button class="tl-filter-btn" data-filter="category" data-value="system">系统</button>
+                        <label>Category（类别）：</label>
+                        <button class="tl-filter-btn active" data-filter="category" data-value="all">All（全部）</button>
+                        <button class="tl-filter-btn" data-filter="category" data-value="agent">Agent（智能体）</button>
+                        <button class="tl-filter-btn" data-filter="category" data-value="work">Work（工作）</button>
+                        <button class="tl-filter-btn" data-filter="category" data-value="comms">Comms（通信）</button>
+                        <button class="tl-filter-btn" data-filter="category" data-value="system">System（系统）</button>
                     </div>
                     <div class="tl-filter-group">
-                        <label>Rig：</label>
+                        <label>Rig:</label>
                         <select class="tl-filter-select" id="tl-rig-filter">
-                            <option value="all">全部 Rig</option>
+                            <option value="all">All Rig（全部 Rig）</option>
                         </select>
                     </div>
                     <div class="tl-filter-group">
-                        <label>智能体：</label>
+                        <label>Agent（智能体）:</label>
                         <select class="tl-filter-select" id="tl-agent-filter">
-                            <option value="all">全部智能体</option>
+                            <option value="all">All Agents（全部智能体）</option>
                         </select>
                     </div>
                 </div>
@@ -455,11 +459,11 @@
                         {{end}}
                     </div>
                     <div class="tl-empty-filtered" id="tl-empty-filtered" style="display: none;">
-                        <p>没有符合当前筛选条件的事件</p>
+                        <p>No events matching current filters（没有符合当前筛选条件的事件）</p>
                     </div>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无近期活动</p>
+                        <p>No recent activity（暂无近期活动）</p>
                     </div>
                     {{end}}
                 </div>
@@ -470,23 +474,23 @@
             <!-- Mail Panel -->
             <div class="panel" id="mail-panel">
                 <div class="panel-header">
-                    <h2>邮件</h2>
+                    <h2>Mail（邮件）</h2>
                     <span class="count" id="mail-count">{{len .Mail}}</span>
                     <div class="mail-tabs">
-                        <button class="mail-tab active" data-tab="inbox">收件箱</button>
-                        <button class="mail-tab" data-tab="all">全部流量</button>
+                        <button class="mail-tab active" data-tab="inbox">Inbox（收件箱）</button>
+                        <button class="mail-tab" data-tab="all">All Traffic（全部流量）</button>
                     </div>
-                    <button class="compose-btn" id="compose-mail-btn" title="撰写新消息">新建</button>
+                    <button class="compose-btn" id="compose-mail-btn" title="Compose new message（撰写新消息）">New（新建）</button>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     <!-- Inbox view (threaded conversations via API) -->
                     <div id="mail-list">
-                        <div class="loading-state" id="mail-loading">加载收件箱...</div>
+                        <div class="loading-state" id="mail-loading">Loading inbox...（加载收件箱...）</div>
                         <div id="mail-threads" style="display: none;"></div>
                         <div class="empty-state" id="mail-empty" style="display: none;">
-                            <p>收件箱中暂无邮件</p>
+                            <p>No mail in inbox（收件箱中暂无邮件）</p>
                         </div>
                     </div>
                     <!-- All Mail view (all traffic from beads) -->
@@ -495,10 +499,10 @@
                         <table class="mail-all-table">
                             <thead>
                                 <tr>
-                                    <th>发件人</th>
-                                    <th>收件人</th>
-                                    <th>主题</th>
-                                    <th>时间</th>
+                                    <th>From（发件人）</th>
+                                    <th>To（收件人）</th>
+                                    <th>Subject（主题）</th>
+                                    <th>Time（时间）</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -518,48 +522,48 @@
                         </table>
                         {{else}}
                         <div class="empty-state">
-                            <p>暂无邮件流量</p>
+                            <p>No mail traffic（暂无邮件流量）</p>
                         </div>
                         {{end}}
                     </div>
                     <!-- Message detail view (hidden by default) -->
                     <div id="mail-detail" class="mail-detail" style="display: none;">
                         <div class="mail-detail-header">
-                            <button class="mail-back-btn" id="mail-back-btn">← 返回</button>
+                            <button class="mail-back-btn" id="mail-back-btn">← Back（返回）</button>
                             <span class="mail-detail-subject" id="mail-detail-subject"></span>
                         </div>
                         <div class="mail-detail-meta">
-                            <span class="mail-detail-from">发件人：<strong id="mail-detail-from"></strong></span>
+                            <span class="mail-detail-from">From（发件人）：<strong id="mail-detail-from"></strong></span>
                             <span class="mail-detail-time" id="mail-detail-time"></span>
                         </div>
                         <div class="mail-detail-body" id="mail-detail-body"></div>
                         <div class="mail-detail-actions">
-                            <button class="mail-reply-btn" id="mail-reply-btn">↩ 回复</button>
+                            <button class="mail-reply-btn" id="mail-reply-btn">↩ Reply（回复）</button>
                         </div>
                     </div>
                     <!-- Compose form (hidden by default) -->
                     <div id="mail-compose" class="mail-compose" style="display: none;">
                         <div class="mail-compose-header">
-                            <button class="mail-back-btn" id="compose-back-btn">← 返回</button>
-                            <span class="mail-compose-title" id="mail-compose-title">新消息</span>
+                            <button class="mail-back-btn" id="compose-back-btn">← Back（返回）</button>
+                            <span class="mail-compose-title" id="mail-compose-title">New Message（新消息）</span>
                         </div>
                         <div class="mail-compose-form">
                             <div class="mail-compose-field">
-                                <label for="compose-to">收件人：</label>
+                                <label for="compose-to">To（收件人）：</label>
                                 <select id="compose-to" class="mail-compose-input"></select>
                             </div>
                             <div class="mail-compose-field">
-                                <label for="compose-subject">主题：</label>
-                                <input type="text" id="compose-subject" class="mail-compose-input" placeholder="输入主题...">
+                                <label for="compose-subject">Subject（主题）：</label>
+                                <input type="text" id="compose-subject" class="mail-compose-input" placeholder="Enter subject...">
                             </div>
                             <div class="mail-compose-field">
-                                <label for="compose-body">内容：</label>
-                                <textarea id="compose-body" class="mail-compose-textarea" placeholder="输入消息内容..." rows="4"></textarea>
+                                <label for="compose-body">Body（内容）：</label>
+                                <textarea id="compose-body" class="mail-compose-textarea" placeholder="Enter message body..." rows="4"></textarea>
                             </div>
                             <input type="hidden" id="compose-reply-to" value="">
                             <div class="mail-compose-actions">
-                                <button class="mail-send-btn" id="mail-send-btn">发送</button>
-                                <button class="mail-cancel-btn" id="compose-cancel-btn">取消</button>
+                                <button class="mail-send-btn" id="mail-send-btn">Send（发送）</button>
+                                <button class="mail-cancel-btn" id="compose-cancel-btn">Cancel（取消）</button>
                             </div>
                         </div>
                     </div>
@@ -569,10 +573,10 @@
             <!-- Merge Queue Panel -->
             <div class="panel" id="merge-queue-panel">
                 <div class="panel-header">
-                    <h2>合并队列</h2>
+                    <h2>Merge Queue（合并队列）</h2>
                     <span class="count">{{len .MergeQueue}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     <!-- PR List View -->
@@ -583,9 +587,9 @@
                                 <tr>
                                     <th>PR</th>
                                     <th>Repo</th>
-                                    <th>标题</th>
+                                    <th>Title（标题）</th>
                                     <th>CI</th>
-                                    <th>合并</th>
+                                    <th>Merge（合并）</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -595,14 +599,14 @@
                                     <td>{{.Repo}}</td>
                                     <td class="pr-title">{{.Title}}</td>
                                     <td>
-                                        {{if eq .CIStatus "pass"}}<span class="badge badge-green">CI 通过</span>
-                                        {{else if eq .CIStatus "fail"}}<span class="badge badge-red">CI 失败</span>
-                                        {{else}}<span class="badge badge-yellow">CI 运行中</span>{{end}}
+                                        {{if eq .CIStatus "pass"}}<span class="badge badge-green">CI Passed（CI 通过）</span>
+                                        {{else if eq .CIStatus "fail"}}<span class="badge badge-red">CI Failed（CI 失败）</span>
+                                        {{else}}<span class="badge badge-yellow">CI Running（CI 运行中）</span>{{end}}
                                     </td>
                                     <td>
-                                        {{if eq .Mergeable "ready"}}<span class="badge badge-green">就绪</span>
-                                        {{else if eq .Mergeable "conflict"}}<span class="badge badge-red">冲突</span>
-                                        {{else}}<span class="badge badge-muted">等待中</span>{{end}}
+                                        {{if eq .Mergeable "ready"}}<span class="badge badge-green">Ready（就绪）</span>
+                                        {{else if eq .Mergeable "conflict"}}<span class="badge badge-red">Conflict（冲突）</span>
+                                        {{else}}<span class="badge badge-muted">Pending（等待中）</span>{{end}}
                                     </td>
                                 </tr>
                                 {{end}}
@@ -610,15 +614,15 @@
                         </table>
                         {{else}}
                         <div class="empty-state">
-                            <p>队列中暂无 PR</p>
+                            <p>No PR in queue（队列中暂无 PR）</p>
                         </div>
                         {{end}}
                     </div>
                     <!-- PR Detail View (hidden by default) -->
                     <div id="pr-detail" style="display: none;">
                         <div class="detail-header">
-                            <button id="pr-back-btn" class="btn-back">← 返回</button>
-                            <a id="pr-detail-link" href="#" target="_blank" class="btn-link">在 GitHub 中打开 ↗</a>
+                            <button id="pr-back-btn" class="btn-back">← Back（返回）</button>
+                            <a id="pr-detail-link" href="#" target="_blank" class="btn-link">Open in GitHub（在 GitHub 中打开）↗</a>
                         </div>
                         <div class="pr-detail-content">
                             <div class="pr-detail-title">
@@ -637,15 +641,15 @@
                                 <span id="pr-detail-files"></span>
                             </div>
                             <div class="pr-detail-section">
-                                <h4>描述</h4>
+                                <h4>Description（描述）</h4>
                                 <pre id="pr-detail-body"></pre>
                             </div>
                             <div id="pr-detail-labels-section" class="pr-detail-section" style="display: none;">
-                                <h4>标签</h4>
+                                <h4>Labels（标签）</h4>
                                 <div id="pr-detail-labels"></div>
                             </div>
                             <div id="pr-detail-checks-section" class="pr-detail-section" style="display: none;">
-                                <h4>检查</h4>
+                                <h4>Checks（检查）</h4>
                                 <div id="pr-detail-checks"></div>
                             </div>
                         </div>
@@ -656,21 +660,21 @@
             <!-- Escalations Panel -->
             <div class="panel">
                 <div class="panel-header">
-                    <h2>升级事件</h2>
+                    <h2>Escalation（升级事件）</h2>
                     <span class="count{{if .Escalations}} count-alert{{end}}">{{len .Escalations}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     {{if .Escalations}}
                     <table>
                         <thead>
                             <tr>
-                                <th>严重程度</th>
+                                <th>Severity（严重程度）</th>
                                 <th>Issue</th>
-                                <th>来源</th>
-                                <th>时间</th>
-                                <th>操作</th>
+                                <th>Source（来源）</th>
+                                <th>Time（时间）</th>
+                                <th>Actions（操作）</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -690,10 +694,10 @@
                                 <td>{{.Age}}</td>
                                 <td class="escalation-actions">
                                     {{if not .Acked}}
-                                    <button class="esc-btn esc-ack-btn" data-action="ack" data-id="{{.ID}}" title="确认">确认</button>
+                                    <button class="esc-btn esc-ack-btn" data-action="ack" data-id="{{.ID}}" title="Ack（确认）">Ack（确认）</button>
                                     {{end}}
-                                    <button class="esc-btn esc-resolve-btn" data-action="resolve" data-id="{{.ID}}" title="解决">解决</button>
-                                    <button class="esc-btn esc-reassign-btn" data-action="reassign" data-id="{{.ID}}" title="重新分配">↻ 重新分配</button>
+                                    <button class="esc-btn esc-resolve-btn" data-action="resolve" data-id="{{.ID}}" title="Resolve（解决）">Resolve（解决）</button>
+                                    <button class="esc-btn esc-reassign-btn" data-action="reassign" data-id="{{.ID}}" title="Reassign（重新分配）">↻ Reassign（重新分配）</button>
                                 </td>
                             </tr>
                             {{end}}
@@ -701,7 +705,7 @@
                     </table>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无升级事件</p>
+                        <p>No escalations（暂无升级事件）</p>
                     </div>
                     {{end}}
                 </div>
@@ -715,17 +719,17 @@
                     <h2>Rig（项目）</h2>
                     <span class="count">{{len .Rigs}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     {{if .Rigs}}
                     <table>
                         <thead>
                             <tr>
-                                <th>名称</th>
+                                <th>Name（名称）</th>
                                 <th>Polecat</th>
                                 <th>Crew</th>
-                                <th>智能体</th>
+                                <th>Agent（智能体）</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -744,7 +748,7 @@
                     </table>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无 Rig 配置</p>
+                        <p>No Rig configured（暂无 Rig 配置）</p>
                     </div>
                     {{end}}
                 </div>
@@ -756,17 +760,17 @@
                     <h2>Dog（后台任务）</h2>
                     <span class="count">{{len .Dogs}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     {{if .Dogs}}
                     <table>
                         <thead>
                             <tr>
-                                <th>名称</th>
-                                <th>状态</th>
-                                <th>工作</th>
-                                <th>活动</th>
+                                <th>Name（名称）</th>
+                                <th>Status（状态）</th>
+                                <th>Work（工作）</th>
+                                <th>Activity（活动）</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -774,8 +778,8 @@
                             <tr>
                                 <td><span class="polecat-name">{{.Name}}</span></td>
                                 <td>
-                                    {{if eq .State "idle"}}<span class="badge badge-green">空闲</span>
-                                    {{else}}<span class="badge badge-yellow">工作中</span>{{end}}
+                                    {{if eq .State "idle"}}<span class="badge badge-green">Idle（空闲）</span>
+                                    {{else}}<span class="badge badge-yellow">Working（工作中）</span>{{end}}
                                 </td>
                                 <td class="status-hint">{{.Work}}</td>
                                 <td>{{.LastActive}}</td>
@@ -785,7 +789,7 @@
                     </table>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无 Dog 在线</p>
+                        <p>No Dog online（暂无 Dog 在线）</p>
                     </div>
                     {{end}}
                 </div>
@@ -795,21 +799,21 @@
             {{if .Queues}}
             <div class="panel">
                 <div class="panel-header">
-                    <h2>队列</h2>
+                    <h2>Queue（队列）</h2>
                     <span class="count">{{len .Queues}}</span>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     <table>
                         <thead>
                             <tr>
-                                <th>队列</th>
-                                <th>状态</th>
-                                <th>可用</th>
-                                <th>处理中</th>
-                                <th>完成</th>
-                                <th>失败</th>
+                                <th>Queue（队列）</th>
+                                <th>Status（状态）</th>
+                                <th>Available（可用）</th>
+                                <th>Processing（处理中）</th>
+                                <th>Done（完成）</th>
+                                <th>Failed（失败）</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -817,9 +821,9 @@
                             <tr>
                                 <td>{{.Name}}</td>
                                 <td>
-                                    {{if eq .Status "active"}}<span class="badge badge-green">活跃</span>
-                                    {{else if eq .Status "paused"}}<span class="badge badge-yellow">暂停</span>
-                                    {{else}}<span class="badge badge-muted">关闭</span>{{end}}
+                                    {{if eq .Status "active"}}<span class="badge badge-green">Active（活跃）</span>
+                                    {{else if eq .Status "paused"}}<span class="badge badge-yellow">Paused（暂停）</span>
+                                    {{else}}<span class="badge badge-muted">Closed（关闭）</span>{{end}}
                                 </td>
                                 <td>{{.Available}}</td>
                                 <td>{{.Processing}}</td>
@@ -836,16 +840,16 @@
             <!-- Work Panel (Combined Issues + Ready Work) -->
             <div class="panel" id="work-panel">
                 <div class="panel-header">
-                    <h2>工作项</h2>
+                    <h2>Issue（工作项）</h2>
                     <span class="count">{{len .Issues}}</span>
-                    <button class="new-issue-btn" onclick="openIssueModal()">+ 新建</button>
+                    <button class="new-issue-btn" onclick="openIssueModal()">+ New（新建）</button>
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-tabs">
-                    <button class="tab-btn active" data-tab="ready" onclick="switchWorkTab('ready')">就绪</button>
-                    <button class="tab-btn" data-tab="progress" onclick="switchWorkTab('progress')">进行中</button>
-                    <button class="tab-btn" data-tab="all" onclick="switchWorkTab('all')">全部</button>
+                    <button class="tab-btn active" data-tab="ready" onclick="switchWorkTab('ready')">Ready（就绪）</button>
+                    <button class="tab-btn" data-tab="progress" onclick="switchWorkTab('progress')">In Progress（进行中）</button>
+                    <button class="tab-btn" data-tab="all" onclick="switchWorkTab('all')">All（全部）</button>
                 </div>
                 <div class="panel-body">
                     <!-- Issues List View -->
@@ -854,12 +858,12 @@
                         <table id="work-table">
                             <thead>
                                 <tr>
-                                    <th>优先</th>
+                                    <th>Priority（优先）</th>
                                     <th>ID</th>
-                                    <th>标题</th>
-                                    <th>状态</th>
-                                    <th>时间</th>
-                                    <th>操作</th>
+                                    <th>Title（标题）</th>
+                                    <th>Status（状态）</th>
+                                    <th>Time（时间）</th>
+                                    <th>Actions（操作）</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -874,24 +878,24 @@
                                     <td><span class="issue-id">{{.ID}}</span></td>
                                     <td class="issue-title">{{.Title}}</td>
                                     <td class="issue-status">
-                                        {{if .Assignee}}<span class="badge badge-blue" title="{{.Assignee}}">{{.Assignee}}</span>{{else}}<span class="badge badge-green">就绪</span>{{end}}
+                                        {{if .Assignee}}<span class="badge badge-blue" title="{{.Assignee}}">{{.Assignee}}</span>{{else}}<span class="badge badge-green">Ready（就绪）</span>{{end}}
                                     </td>
                                     <td class="issue-age">{{.Age}}</td>
-                                    <td><button class="sling-btn" data-bead-id="{{.ID}}" title="分配到 Rig">分配</button></td>
+                                    <td><button class="sling-btn" data-bead-id="{{.ID}}" title="Assign to Rig（分配到 Rig）">Assign（分配）</button></td>
                                 </tr>
                                 {{end}}
                             </tbody>
                         </table>
                         {{else}}
                         <div class="empty-state">
-                            <p>暂无工作项</p>
+                            <p>No issues（暂无工作项）</p>
                         </div>
                         {{end}}
                     </div>
                     <!-- Issue Detail View (hidden by default) -->
                     <div id="issue-detail" style="display: none;">
                         <div class="detail-header">
-                            <button id="issue-back-btn" class="btn-back">← 返回</button>
+                            <button id="issue-back-btn" class="btn-back">← Back（返回）</button>
                         </div>
                         <div class="issue-detail-content">
                             <div class="issue-detail-title">
@@ -907,15 +911,15 @@
                             </div>
                             <div id="issue-detail-actions" class="issue-detail-actions"></div>
                             <div class="issue-detail-section">
-                                <h4>描述</h4>
+                                <h4>Description（描述）</h4>
                                 <pre id="issue-detail-description"></pre>
                             </div>
                             <div id="issue-detail-deps" class="issue-detail-section" style="display: none;">
-                                <h4>依赖</h4>
+                                <h4>Dependencies（依赖）</h4>
                                 <div id="issue-detail-depends-on"></div>
                             </div>
                             <div id="issue-detail-blocks-section" class="issue-detail-section" style="display: none;">
-                                <h4>阻塞</h4>
+                                <h4>Blocked（阻塞）</h4>
                                 <div id="issue-detail-blocks"></div>
                             </div>
                         </div>
@@ -928,18 +932,18 @@
                 <div class="panel-header">
                     <h2>Hook（工作区）</h2>
                     <span class="count{{if .Hooks}} {{end}}">{{len .Hooks}}</span>
-                    <button class="hook-attach-btn" onclick="openHookAttachForm()">+ 挂载</button>
-                    {{if .Hooks}}<button class="hook-clear-all-btn" onclick="clearAllHooks()">全部清除</button>{{end}}
+                    <button class="hook-attach-btn" onclick="openHookAttachForm()">+ Mount（挂载）</button>
+                    {{if .Hooks}}<button class="hook-clear-all-btn" onclick="clearAllHooks()">Clear All（全部清除）</button>{{end}}
                     <button class="collapse-btn" aria-label="Toggle panel">▼</button>
-                    <button class="expand-btn">展开</button>
+                    <button class="expand-btn">Expand（展开）</button>
                 </div>
                 <div class="panel-body">
                     <!-- Attach Hook Form (hidden by default) -->
                     <div id="hook-attach-form" class="hook-attach-form" style="display:none;">
                         <div class="hook-attach-form-row">
-                            <input type="text" id="hook-attach-bead" class="hook-attach-input" placeholder="Bead ID（例: gt-abc）">
-                            <button class="hook-attach-submit" onclick="submitHookAttach()">挂载</button>
-                            <button class="hook-attach-cancel" onclick="closeHookAttachForm()">取消</button>
+                            <input type="text" id="hook-attach-bead" class="hook-attach-input" placeholder="Bead ID (e.g. gt-abc)">
+                            <button class="hook-attach-submit" onclick="submitHookAttach()">Mount（挂载）</button>
+                            <button class="hook-attach-cancel" onclick="closeHookAttachForm()">Cancel（取消）</button>
                         </div>
                     </div>
                     {{if .Hooks}}
@@ -947,9 +951,9 @@
                         <thead>
                             <tr>
                                 <th>Bead</th>
-                                <th>标题</th>
-                                <th>智能体</th>
-                                <th>挂载时间</th>
+                                <th>Title（标题）</th>
+                                <th>Agent（智能体）</th>
+                                <th>Mount Time（挂载时间）</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -966,14 +970,14 @@
                                     {{.Age}}
                                     {{end}}
                                 </td>
-                                <td><button class="hook-detach-btn" data-hook-id="{{.ID}}" onclick="detachHook(this)">卸载</button></td>
+                                <td><button class="hook-detach-btn" data-hook-id="{{.ID}}" onclick="detachHook(this)">Detach（卸载）</button></td>
                             </tr>
                             {{end}}
                         </tbody>
                     </table>
                     {{else}}
                     <div class="empty-state">
-                        <p>暂无挂载的工作</p>
+                        <p>No mounted work（暂无挂载的工作）</p>
                     </div>
                     {{end}}
                 </div>
@@ -984,12 +988,12 @@
     <!-- Command Palette (outside HTMX-refreshed area) -->
     <div id="command-palette-overlay" class="command-palette-overlay">
         <div class="command-palette">
-            <input type="text" id="command-palette-input" class="command-palette-input" placeholder="搜索命令..." autocomplete="off">
+            <input type="text" id="command-palette-input" class="command-palette-input" placeholder="Search commands...（搜索命令...）" autocomplete="off">
             <div id="command-palette-results" class="command-palette-results"></div>
             <div class="command-palette-footer">
-                <span><kbd>↑↓</kbd> 导航</span>
-                <span><kbd>↵</kbd> 执行</span>
-                <span><kbd>esc</kbd> 关闭</span>
+                <span><kbd>↑↓</kbd> Navigate（导航）</span>
+                <span><kbd>↵</kbd> Execute（执行）</span>
+                <span><kbd>esc</kbd> Close（关闭）</span>
             </div>
         </div>
     </div>
@@ -1003,30 +1007,30 @@
         <div class="modal-backdrop" onclick="closeIssueModal()"></div>
         <div class="modal-content">
             <div class="modal-header">
-                <h3>创建新 Issue</h3>
+                <h3>Create New Issue（创建新 Issue）</h3>
                 <button class="modal-close" onclick="closeIssueModal()">X</button>
             </div>
             <form id="issue-form" onsubmit="submitIssue(event)">
                 <div class="form-group">
-                    <label for="issue-title">标题 *</label>
-                    <input type="text" id="issue-title" placeholder="需要完成什么？" required autofocus>
+                    <label for="issue-title">Title（标题）*</label>
+                    <input type="text" id="issue-title" placeholder="What needs to be done?（需要完成什么？）" required autofocus>
                 </div>
                 <div class="form-group">
-                    <label for="issue-priority">优先级</label>
+                    <label for="issue-priority">Priority（优先级）</label>
                     <select id="issue-priority">
-                        <option value="1">P1 - 紧急</option>
-                        <option value="2" selected>P2 - 高（默认）</option>
-                        <option value="3">P3 - 中</option>
-                        <option value="4">P4 - 低</option>
+                        <option value="1">P1 - Urgent（紧急）</option>
+                        <option value="2" selected>P2 - High（高）(default)</option>
+                        <option value="3">P3 - Medium（中）</option>
+                        <option value="4">P4 - Low（低）</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="issue-description">描述（可选）</label>
-                    <textarea id="issue-description" rows="3" placeholder="补充上下文或详细信息..."></textarea>
+                    <label for="issue-description">Description（描述）(optional)</label>
+                    <textarea id="issue-description" rows="3" placeholder="Add context or details...（补充上下文或详细信息...）"></textarea>
                 </div>
                 <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeIssueModal()">取消</button>
-                    <button type="submit" class="btn-primary" id="issue-submit-btn">创建 Issue</button>
+                    <button type="button" class="btn-secondary" onclick="closeIssueModal()">Cancel（取消）</button>
+                    <button type="submit" class="btn-primary" id="issue-submit-btn">Create Issue（创建 Issue）</button>
                 </div>
             </form>
         </div>
@@ -1036,11 +1040,11 @@
         <div class="output-panel-header">
             <span class="output-panel-title">
                 <span></span>
-                <span id="output-panel-cmd">命令输出</span>
+                <span id="output-panel-cmd">Command Output（命令输出）</span>
             </span>
             <div class="output-panel-actions">
-                <button id="output-copy-btn" class="output-panel-btn">复制</button>
-                <button id="output-close-btn" class="output-panel-btn">关闭</button>
+                <button id="output-copy-btn" class="output-panel-btn">Copy（复制）</button>
+                <button id="output-close-btn" class="output-panel-btn">Close（关闭）</button>
             </div>
         </div>
         <div id="output-panel-content" class="output-panel-content"></div>

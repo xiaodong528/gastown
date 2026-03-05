@@ -98,7 +98,7 @@ type LiveConvoyFetcher struct {
 func NewLiveConvoyFetcher() (*LiveConvoyFetcher, error) {
 	townRoot, err := workspace.FindFromCwdOrError()
 	if err != nil {
-		return nil, fmt.Errorf("not in a Gas Town workspace: %w", err)
+		return nil, fmt.Errorf("not in a JuZhi workspace: %w", err)
 	}
 
 	webCfg := config.DefaultWebTimeoutsConfig()
@@ -1340,7 +1340,7 @@ func (f *LiveConvoyFetcher) FetchSessions() ([]SessionRow, error) {
 		parts := strings.SplitN(line, ":", 2)
 		name := parts[0]
 
-		// Only include Gas Town sessions
+		// Only include JuZhi sessions
 		if !session.IsKnownSession(name) {
 			continue
 		}
