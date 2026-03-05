@@ -68,3 +68,8 @@ result
 
 # bv (beads viewer) local config and caches
 .bv/
+
+.serena
+tasks
+internal/events/refinery
+internal/events/witness

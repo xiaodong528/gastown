@@ -448,7 +448,7 @@ func TestConvoyHandler_WorkStatusRendering(t *testing.T) {
 		wantClass      string
 		wantStatusText string
 	}{
-		{"complete status", "complete", "badge-green", "✓"},
+		{"complete status", "complete", "badge-green", "Done"},
 		{"active status", "active", "badge-green", "Active"},
 		{"stale status", "stale", "badge-yellow", "Stale"},
 		{"stuck status", "stuck", "badge-red", "Stuck"},
@@ -926,7 +926,7 @@ func TestE2E_Server_HTMLStructure(t *testing.T) {
 		"<!DOCTYPE html>",
 		"<html",
 		"<head>",
-		"<title>Gas Town Control Center</title>",
+		"<title>JoinAI Control Center</title>",
 		"htmx.org",
 		"<body>",
 		"</body>",

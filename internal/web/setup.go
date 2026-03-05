@@ -317,7 +317,7 @@ func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Re
 		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{
 			Valid:   false,
 			Path:    path,
-			Message: "Not a Gas Town workspace (no mayor/ directory)",
+			Message: "Not a JoinAITown workspace (no mayor/ directory)",
 		})
 		return
 	}
@@ -420,7 +420,7 @@ const setupHTML = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="dashboard-token" content="<!--CSRF_TOKEN-->">
-    <title>Gas Town Setup</title>
+    <title>JoinAITown Setup</title>
     <style>
         :root {
             --bg-dark: #0d1117;
@@ -729,15 +729,15 @@ const setupHTML = `<!DOCTYPE html>
 | $$$    \$$$| $$     \| $$     \\$$    $$ \$$    $$| $$  \$ | $$| $$     \                       
  \$$      \$$ \$$$$$$$$ \$$$$$$$$ \$$$$$$   \$$$$$$  \$$      \$$ \$$$$$$$$                       
                                                                                                   
- ________   ______          ______    ______    ______   ________   ______   __       __  __    __ 
-|        \ /      \        /      \  /      \  /      \ |        \ /      \ |  \  _  |  \|  \  |  \
- \$$$$$$$$|  $$$$$$\      |  $$$$$$\|  $$$$$$\|  $$$$$$\ \$$$$$$$$|  $$$$$$\| $$ / \ | $$| $$\ | $$
-   | $$   | $$  | $$      | $$ __\$$| $$__| $$| $$___\$$   | $$   | $$  | $$| $$/  $\| $$| $$$\| $$
-   | $$   | $$  | $$      | $$|    \| $$    $$ \$$    \    | $$   | $$  | $$| $$  $$$\ $$| $$$$\ $$
-   | $$   | $$  | $$      | $$ \$$$$| $$$$$$$$ _\$$$$$$\   | $$   | $$  | $$| $$ $$\$$\$$| $$\$$ $$
-   | $$   | $$__/ $$      | $$__| $$| $$  | $$|  \__| $$   | $$   | $$__/ $$| $$$$  \$$$$| $$ \$$$$
-   | $$    \$$    $$       \$$    $$| $$  | $$ \$$    $$   | $$    \$$    $$| $$$    \$$$| $$  \$$$
-    \$$     \$$$$$$         \$$$$$$  \$$   \$$  \$$$$$$     \$$     \$$$$$$  \$$      \$$ \$$   \$$</pre>
+ ________   ______           __   ______   ______   __    __   ______   ______   ________   ______   __       __  __    __ 
+|        \ /      \         |  \ /      \ |      \|  \  |  \ /      \ |      \|        \ /      \ |  \  _  |  \|  \  |  \
+ \$$$$$$$$|  $$$$$$\         \$$|  $$$$$$\ \$$$$$$| $$\ | $$|  $$$$$$\ \$$$$$$ \$$$$$$$$|  $$$$$$\| $$ / \ | $$| $$\ | $$
+   | $$   | $$  | $$          $$| $$  | $$  | $$  | $$$\| $$| $$__| $$  | $$     | $$   | $$  | $$| $$/  $\| $$| $$$\| $$
+   | $$   | $$  | $$          $$| $$  | $$  | $$  | $$$$\ $$| $$    $$  | $$     | $$   | $$  | $$| $$  $$$\ $$| $$$$\ $$
+   | $$   | $$  | $$     $$   $$| $$  | $$  | $$  | $$\$$ $$| $$$$$$$$  | $$     | $$   | $$  | $$| $$ $$\$$\$$| $$\$$ $$
+   | $$   | $$__/ $$     $$   $$| $$__/ $$ _| $$_ | $$ \$$$$| $$  | $$ _| $$_    | $$   | $$__/ $$| $$$$  \$$$$| $$ \$$$$
+   | $$    \$$    $$      \$$$$\ \$$    $$|   $$ \| $$  \$$$| $$  | $$|   $$ \   | $$    \$$    $$| $$$    \$$$| $$  \$$$
+    \$$     \$$$$$$         \$$$  \$$$$$$  \$$$$$$  \$$   \$$ \$$   \$$ \$$$$$$    \$$     \$$$$$$  \$$      \$$ \$$   \$$</pre>
             <p>Let's set up your workspace</p>
         </div>
 
@@ -751,12 +751,12 @@ const setupHTML = `<!DOCTYPE html>
         <div class="setup-card" id="mode-existing">
             <h2>Open Existing Workspace</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
-                Enter the path to an existing Gas Town workspace.
+                Enter the path to an existing JoinAITown workspace.
             </p>
             <div class="form-group">
                 <label>Workspace Path</label>
                 <input type="text" id="existing-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">Path to your Gas Town HQ directory</div>
+                <div class="hint">Path to your JoinAITown HQ directory</div>
             </div>
             <button class="btn btn-primary" id="check-btn" onclick="checkWorkspace()">Check Workspace</button>
             <div id="workspace-result"></div>
@@ -768,7 +768,7 @@ const setupHTML = `<!DOCTYPE html>
             <div class="form-group">
                 <label>Workspace Path</label>
                 <input type="text" id="install-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">Where to create your Gas Town headquarters</div>
+                <div class="hint">Where to create your JoinAITown headquarters</div>
             </div>
             <div class="form-group">
                 <label>Workspace Name (optional)</label>
@@ -805,7 +805,7 @@ const setupHTML = `<!DOCTYPE html>
 
         <!-- Step 3: Done -->
         <div class="setup-card hidden" id="step3">
-            <h2><span class="step-number done">✓</span> Ready to Launch!</h2>
+            <h2><span class="step-number done">OK</span> Ready to Launch!</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px;">
                 Your workspace is ready at <code id="workspace-path" style="background: var(--bg-dark); padding: 2px 6px; border-radius: 4px;">~/gt</code>
             </p>
@@ -872,7 +872,7 @@ const setupHTML = `<!DOCTYPE html>
                         rigsHtml = '<div class="rigs">No rigs configured yet</div>';
                     }
                     result.innerHTML = '<div class="workspace-info">' +
-                        '<div class="name">✓ ' + (data.name || 'Workspace') + '</div>' +
+                        '<div class="name">' + (data.name || 'Workspace') + '</div>' +
                         '<div class="path">' + data.path + '</div>' +
                         rigsHtml +
                         '</div>' +
@@ -908,7 +908,7 @@ const setupHTML = `<!DOCTYPE html>
                 if (data.success) {
                     // Show loading message
                     document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;color:#e6edf3;font-family:monospace;background:#0d1117;">' +
-                        '<div style="font-size:1.5rem;color:#58a6ff;margin-bottom:16px;">🚚</div>' +
+                        '<div style="font-size:1.5rem;color:#58a6ff;margin-bottom:16px;"></div>' +
                         '<div style="font-size:1rem;color:#8b949e;">loading control center...</div>' +
                         '</div>';
                     // Redirect to the new dashboard
@@ -966,7 +966,7 @@ const setupHTML = `<!DOCTYPE html>
                     output.className = 'output-box visible success';
                     workspacePath = path;
                     document.getElementById('step1-num').className = 'step-number done';
-                    document.getElementById('step1-num').textContent = '✓';
+                    document.getElementById('step1-num').textContent = 'OK';
                     document.getElementById('step2').classList.remove('hidden');
                     document.getElementById('workspace-path').textContent = path;
                 } else {
@@ -1011,7 +1011,7 @@ const setupHTML = `<!DOCTYPE html>
                 if (data.success) {
                     output.className = 'output-box visible success';
                     document.getElementById('step2-num').className = 'step-number done';
-                    document.getElementById('step2-num').textContent = '✓';
+                    document.getElementById('step2-num').textContent = 'OK';
                     document.getElementById('step3').classList.remove('hidden');
                 } else {
                     output.className = 'output-box visible error';
@@ -1027,7 +1027,7 @@ const setupHTML = `<!DOCTYPE html>
 
         function skipRig() {
             document.getElementById('step2-num').className = 'step-number done';
-            document.getElementById('step2-num').textContent = '✓';
+            document.getElementById('step2-num').textContent = 'OK';
             document.getElementById('step3').classList.remove('hidden');
         }
 

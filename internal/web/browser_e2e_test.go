@@ -127,8 +127,8 @@ func TestBrowser_ConvoyListLoads(t *testing.T) {
 
 	// Verify page title
 	title := page.MustElement("title").MustText()
-	if !strings.Contains(title, "Gas Town") {
-		t.Fatalf("Expected title to contain 'Gas Town', got: %s", title)
+	if !strings.Contains(title, "JoinAI") {
+		t.Fatalf("Expected title to contain 'JoinAI', got: %s", title)
 	}
 
 	// Verify convoy IDs are displayed
