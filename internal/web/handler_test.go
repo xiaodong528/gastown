@@ -926,7 +926,7 @@ func TestE2E_Server_HTMLStructure(t *testing.T) {
 		"<!DOCTYPE html>",
 		"<html",
 		"<head>",
-		"<title>聚智JoinAI Swarm· 多智能体编排控制中心</title>",
+		"<title>聚智JoinAI Swarm · 多智能体编排控制中心</title>",
 		"htmx.org",
 		"<body>",
 		"</body>",

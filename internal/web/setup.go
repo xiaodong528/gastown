@@ -318,7 +318,7 @@ func (h *SetupAPIHandler) handleCheckWorkspace(w http.ResponseWriter, r *http.Re
 		_ = json.NewEncoder(w).Encode(CheckWorkspaceResponse{
 			Valid:   false,
 			Path:    path,
-			Message: "不是聚智JoinAI工作空间（缺少 mayor/ 目录）",
+			Message: "不是聚智JoinAI Swarm工作空间（缺少 mayor/ 目录）",
 		})
 		return
 	}
@@ -427,7 +427,7 @@ const setupHTML = `<!DOCTYPE html>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="dashboard-token" content="<!--CSRF_TOKEN-->">
-    <title>聚智JoinAI · 初始设置</title>
+    <title>聚智JoinAI Swarm · 初始设置</title>
     <link rel="icon" href="/static/logo.ico" type="image/x-icon">
     <style>
         :root {
@@ -728,7 +728,7 @@ const setupHTML = `<!DOCTYPE html>
 <body>
     <div class="setup-container">
         <div class="setup-header">
-            <h1 style="font-size:2rem;color:#373B61;margin:0 0 16px 0;font-weight:700;letter-spacing:0.05em;">聚智JoinAI · 多智能体编排控制中心</h1>
+            <h1 style="font-size:1.5rem;color:#373B61;margin:0 0 16px 0;font-weight:700;letter-spacing:0.05em;display:flex;align-items:center;justify-content:center;gap:12px;white-space:nowrap;"><img src="/static/logo.ico" alt="聚智JoinAI" style="height:36px;width:36px;">聚智JoinAI Swarm · 多智能体编排控制中心</h1>
             <p>开始配置您的工作空间</p>
         </div>
 
@@ -742,12 +742,12 @@ const setupHTML = `<!DOCTYPE html>
         <div class="setup-card" id="mode-existing">
             <h2>打开现有工作空间</h2>
             <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
-                输入现有聚智JoinAI工作空间的路径。
+                输入现有聚智JoinAI Swarm工作空间的路径。
             </p>
             <div class="form-group">
                 <label>工作空间路径</label>
                 <input type="text" id="existing-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">聚智JoinAI工作空间目录路径</div>
+                <div class="hint">聚智JoinAI Swarm工作空间目录路径</div>
             </div>
             <button class="btn btn-primary" id="check-btn" onclick="checkWorkspace()">检查工作空间</button>
             <div id="workspace-result"></div>
@@ -759,7 +759,7 @@ const setupHTML = `<!DOCTYPE html>
             <div class="form-group">
                 <label>工作空间路径</label>
                 <input type="text" id="install-path" placeholder="~/gt" value="~/gt">
-                <div class="hint">聚智JoinAI工作空间的创建位置</div>
+                <div class="hint">聚智JoinAI Swarm工作空间的创建位置</div>
             </div>
             <div class="form-group">
                 <label>工作空间名称（可选）</label>
